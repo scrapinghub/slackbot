@@ -1,0 +1,6 @@
+backports.ssl-match-hostname==3.4.0.2
+requests==2.4.0
+six==1.8.0
+websocket-client==0.22.0
+importlib>=1.0.3
+slacker==0.5.5
