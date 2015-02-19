@@ -1,4 +1,12 @@
 language: python
 python: 2.7
-install: "pip install -r requirements.txt"
+install: pip install -r requirements.txt
 script: py.test -s -vv
+deploy:
+  provider: pypi
+  user: lins05
+  password:
+    secure: iU2ff34j+1DQwuJZuRgzO6ProPvalUmMC2gjYjG6XMRbDnaXfROHYwpHTgIkXa4r+ZorSd7UUO7WbkDO1Gsr7DzgODmkFOyyR5Z33PLNj30ubenbkebpCQZgmwwnckPH5WU5Vv++OaCoOR9iJMbyi6xz1gc1mRcEEdud3J+FW44=
+  on:
+    tags: true
+    repo: lins05/slackbot
