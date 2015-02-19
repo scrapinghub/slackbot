@@ -115,7 +115,11 @@ class Driver(object):
     def _join_test_channel(self):
         response = self.slacker.channels.join(self.test_channel)
         self.cm_chan = response.body['channel']['id']
-        self.slacker.channels.invite(self.cm_chan, self.testbot_userid)
+        self._invite_testbot_to_channel()
+
+    def _invite_testbot_to_channel(self):
+        if self.testbot_userid not in self.slacker.channels.info(self.cm_chan).body['channel']['members']:
+            self.slacker.channels.invite(self.cm_chan, self.testbot_userid)
 
     def _is_bot_message(self, msg):
         if msg['type'] != 'message':
