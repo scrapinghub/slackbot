@@ -68,7 +68,7 @@ class Driver(object):
         self._start_ts = time.time()
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
 
-    def _wait_for_bot_message(self, channel, match, maxwait=5):
+    def _wait_for_bot_message(self, channel, match, maxwait=20):
         for _ in xrange(maxwait):
             time.sleep(1)
             if self._has_got_message(channel, match):
