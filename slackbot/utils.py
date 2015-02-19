@@ -1,9 +1,11 @@
 #coding: UTF-8
 import os
-import requests
 import logging
 import tempfile
 import math
+import thread
+import Queue
+import requests
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
@@ -83,3 +85,21 @@ def readable_file_size(size):
     # (.4g results in rounded numbers for exact matches and max 3 decimals,
     # should never resort to exponent values)
     return '{:.4g} {}'.format(size / (1 << (order * 10)), _suffixes[order])
+
+class WorkerPool(object):
+    def __init__(self, func, nworker=10):
+        self.nworker = nworker
+        self.func = func
+        self.queue = Queue.Queue()
+
+    def start(self):
+        for _ in xrange(self.nworker):
+            thread.start_new_thread(self.do_work, tuple())
+
+    def add_task(self, msg):
+        self.queue.put(msg)
+
+    def do_work(self):
+        while True:
+            msg = self.queue.get()
+            self.func(msg)

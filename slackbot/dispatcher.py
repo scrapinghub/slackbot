@@ -1,0 +1,123 @@
+#coding: UTF-8
+
+from glob import glob
+import logging
+import os
+import re
+import sys
+import time
+import traceback
+
+from slackbot.utils import to_utf8, WorkerPool
+
+logger = logging.getLogger(__name__)
+
+AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>: (.*)$')
+
+class MessageDispatcher(object):
+    def __init__(self, slackclient, plugins):
+        self._client = slackclient
+        self._pool = WorkerPool(self.dispatch_msg)
+        self._plugins = plugins
+
+    def start(self):
+        self._pool.start()
+
+    def dispatch_msg(self, msg):
+        text = msg['text']
+        func, args = self._plugins.get_plugin(text)
+        if not func:
+            self._default_reply(msg)
+        else:
+            try:
+                func(Message(self._client, msg), *args)
+            except:
+                logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
+                reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
+                reply += '```\n%s\n```' % traceback.format_exc()
+                self._client.rtm_send_message(msg['channel'], reply)
+            return
+
+    def _on_new_message(self, msg):
+        # ignore bot messages and edits
+        subtype = msg.get('subtype', '')
+        # if subtype == 'bot_message' or subtype == 'message_changed':
+        #     return
+        if subtype == 'message_changed':
+            return
+
+        botname = self._client.login_data['self']['name']
+        try:
+            msguser = self._client.users.get(msg['user'])
+            username = msguser['name']
+        except KeyError:
+            logger.debug('msg {0} has no user'.format(msg))
+            if 'username' in msg:
+                username = msg['username']
+            else:
+                return
+
+        if username == botname or username == 'slackbot':
+            return
+
+        msg = self.filter_text(msg)
+        if msg:
+            self._pool.add_task(msg)
+
+    def filter_text(self, msg):
+        text = msg.get('text', '')
+        channel = msg['channel']
+
+        if channel[0] == 'C':
+            m = AT_MESSAGE_MATCHER.match(text)
+            if not m:
+                return
+            atuser, text = m.groups()
+            if atuser != self._client.login_data['self']['id']:
+                # a channel message at other user
+                return
+            logger.debug('got an AT message: %s', text)
+            msg['text'] = text
+        else:
+            m = AT_MESSAGE_MATCHER.match(text)
+            if m:
+                msg['text'] = m.groups(2)
+        return msg
+
+    def handle_reply(self, msg, reply):
+        channel = msg['channel']
+        if isinstance(reply, basestring):
+            self._client.rtm_send_message(channel, to_utf8(reply))
+        elif isinstance(reply, tuple):
+            self._client.upload_file(channel, to_utf8(reply[1]), to_utf8(reply[2]), to_utf8(reply[3]))
+
+    def loop(self):
+        while True:
+            events = self._client.rtm_read()
+            for event in events:
+                if event.get('type') != 'message':
+                    continue
+                self._on_new_message(event)
+            time.sleep(1)
+
+    def _default_reply(self, msg):
+        default_reply = [
+            u'Bad command "%s", You can ask me one of the following questsion:\n' % msg['text'],
+        ]
+        default_reply += [u'    • %s' % str(f.__name__) for f in self._plugins.commands.itervalues()]
+
+        self._client.rtm_send_message(msg['channel'],
+                                     '\n'.join(to_utf8(default_reply)))
+
+class Message(object):
+    def __init__(self, slackclient, body):
+        self._client = slackclient
+        self._body = body
+
+    def reply(self, text):
+        self._client.rtm_send_message(
+            self._body['channel'], to_utf8(text))
+
+    @property
+    def channel(self):
+        return self._client.get_channel(self._body['channel'])

@@ -1,14 +1,14 @@
 import logging
 import logging.config
-from slack import settings
-from slack.bot import Bot
+from slackbot import settings
+from slackbot.bot import Bot
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s:%(lineno)s %(funcName)s %(message)s'
+            'format': '%(asctime)s [%(levelname)s] %(name)s:%(lineno)s %(message)s'
         },
     },
     'handlers': {
@@ -23,11 +23,6 @@ LOGGING = {
             'handlers': ['default'],
             'level': 'DEBUG' if settings.DEBUG else 'INFO',
             'propagate': True
-        },
-        'slack.bot': {
-            'handlers': ['default'],
-            'level': 'DEBUG' if settings.DEBUG else 'INFO',
-            'propagate': False,
         },
     }
 }
