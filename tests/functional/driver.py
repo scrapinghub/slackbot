@@ -56,7 +56,7 @@ class Driver(object):
                     raise AssertionError(
                         'expected to get nothing, but got message "%s"' % msg['text'])
 
-    def wait_for_file_uploaded(self, name, maxwait=10):
+    def wait_for_file_uploaded(self, name, maxwait=20):
         for _ in xrange(maxwait):
             time.sleep(1)
             if self._has_uploaded_file(name):
