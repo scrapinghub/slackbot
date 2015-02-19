@@ -56,7 +56,7 @@ class Driver(object):
                     raise AssertionError(
                         'expected to get nothing, but got message "%s"' % msg['text'])
 
-    def wait_for_file_uploaded(self, name, maxwait=20):
+    def wait_for_file_uploaded(self, name, maxwait=60):
         for _ in xrange(maxwait):
             time.sleep(1)
             if self._has_uploaded_file(name):
@@ -68,7 +68,7 @@ class Driver(object):
         self._start_ts = time.time()
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
 
-    def _wait_for_bot_message(self, channel, match, maxwait=20):
+    def _wait_for_bot_message(self, channel, match, maxwait=60):
         for _ in xrange(maxwait):
             time.sleep(1)
             if self._has_got_message(channel, match):
