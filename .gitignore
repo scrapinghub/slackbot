@@ -5,3 +5,6 @@
 *.swp
 #*
 local_settings.py
+/build
+/dist
+/*.egg-info
