@@ -26,12 +26,16 @@ def _start_bot_process():
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101
 def driver():
-    p = _start_bot_process()
     driver = Driver(driver_apitoken, driver_username, testbot_username, test_channel)
     driver.start()
+    p = _start_bot_process()
     driver.wait_for_bot_online()
     yield driver
     p.terminate()
+
+@pytest.fixture(autouse=True)   # pylint: disable=E1101
+def clear_events(driver):
+    driver.clear_events()
 
 def test_bot_get_online(driver): # pylint: disable=W0613
     pass

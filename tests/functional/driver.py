@@ -1,6 +1,10 @@
+import thread
+import threading
+import json
+import re
 import time
 import slacker
-import re
+import websocket
 
 
 class Driver(object):
@@ -20,9 +24,13 @@ class Driver(object):
         # direct message channel
         self.dm_chan = None
         self._start_ts = time.time()
+        self._websocket = None
+        self.events = []
+        self._events_lock = threading.Lock()
 
     def start(self):
-        self._fetch_users()
+        self._rtm_connect()
+        # self._fetch_users()
         self._start_dm_channel()
         self._join_test_channel()
 
@@ -48,8 +56,9 @@ class Driver(object):
     def wait_for_bot_channel_message(self, match):
         self._wait_for_bot_message(self.cm_chan, match)
 
-    def ensure_no_channel_reply_from_bot(self, wait=5):
+    def ensure_no_channel_reply_from_bot_api(self, wait=5):
         for _ in xrange(wait):
+            time.sleep(1)
             response = self.slacker.channels.history(
                 self.cm_chan, oldest=self._start_ts, latest=time.time())
             for msg in response.body['messages']:
@@ -57,10 +66,21 @@ class Driver(object):
                     raise AssertionError(
                         'expected to get nothing, but got message "%s"' % msg['text'])
 
+    def ensure_no_channel_reply_from_bot_rtm(self, wait=5):
+        for _ in xrange(wait):
+            time.sleep(1)
+            with self._events_lock:
+                for event in self.events:
+                    if self._is_bot_message(event):
+                        raise AssertionError(
+                            'expected to get nothing, but got message "%s"' % event['text'])
+
+    ensure_no_channel_reply_from_bot = ensure_no_channel_reply_from_bot_rtm
+
     def wait_for_file_uploaded(self, name, maxwait=60):
         for _ in xrange(maxwait):
             time.sleep(1)
-            if self._has_uploaded_file(name):
+            if self._has_uploaded_file_rtm(name):
                 break
         else:
             raise AssertionError('expected to get file "%s", but got nothing' % name)
@@ -72,7 +92,7 @@ class Driver(object):
     def _wait_for_bot_message(self, channel, match, maxwait=60):
         for _ in xrange(maxwait):
             time.sleep(1)
-            if self._has_got_message(channel, match):
+            if self._has_got_message_rtm(channel, match):
                 break
         else:
             raise AssertionError('expected to get message like "%s", but got nothing' % match)
@@ -90,6 +110,15 @@ class Driver(object):
                 return True
         return False
 
+    def _has_got_message_rtm(self, channel, match):
+        if channel.startswith('C'):
+            match = r'\<@%s\>: %s' % (self.driver_userid, match)
+        with self._events_lock:
+            for event in self.events:
+                if event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):
+                    return True
+            return False
+
     def _fetch_users(self):
         response = self.slacker.users.list()
         for user in response.body['members']:
@@ -97,6 +126,35 @@ class Driver(object):
 
         self.testbot_userid = self.users[self.testbot_username]
         self.driver_userid = self.users[self.driver_username]
+
+    def _rtm_connect(self):
+        r = self.slacker.rtm.start().body
+        self.driver_username = r['self']['name']
+        self.driver_userid = r['self']['id']
+
+        self.users = {u['name']: u['id'] for u in r['users']}
+        self.testbot_userid = self.users[self.testbot_username]
+
+        self._websocket = websocket.create_connection(r['url'])
+        self._websocket.sock.setblocking(0)
+        thread.start_new_thread(self._rtm_read_forever, tuple())
+
+    def _websocket_safe_read(self):
+        """Returns data if available, otherwise ''. Newlines indicate multiple messages """
+        data = ''
+        while True:
+            try:
+                data += '{0}\n'.format(self._websocket.recv())
+            except:
+                return data.rstrip()
+
+    def _rtm_read_forever(self):
+        while True:
+            json_data = self._websocket_safe_read()
+            if json_data != '':
+                with self._events_lock:
+                    self.events.extend([json.loads(d) for d in json_data.split('\n')])
+            time.sleep(1)
 
     def _start_dm_channel(self):
         """Start a slack direct messages channel with the test bot"""
@@ -116,6 +174,15 @@ class Driver(object):
                 return True
         return False
 
+    def _has_uploaded_file_rtm(self, name):
+        with self._events_lock:
+            for event in self.events:
+                if event['type'] == 'file_shared' \
+                   and event['file']['name'] == name \
+                   and event['file']['user'] == self.testbot_userid:
+                    return True
+            return False
+
     def _join_test_channel(self):
         response = self.slacker.channels.join(self.test_channel)
         self.cm_chan = response.body['channel']['id']
@@ -128,5 +195,11 @@ class Driver(object):
     def _is_bot_message(self, msg):
         if msg['type'] != 'message':
             return False
+        if not msg.get('channel', '').startswith('C'):
+            return False
         return msg.get('user') == self.testbot_userid \
             or msg.get('username') == self.testbot_username
+
+    def clear_events(self):
+        with self._events_lock:
+            self.events = []
