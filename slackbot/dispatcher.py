@@ -84,13 +84,6 @@ class MessageDispatcher(object):
                 msg['text'] = m.groups(2)
         return msg
 
-    def handle_reply(self, msg, reply):
-        channel = msg['channel']
-        if isinstance(reply, basestring):
-            self._client.rtm_send_message(channel, to_utf8(reply))
-        elif isinstance(reply, tuple):
-            self._client.upload_file(channel, to_utf8(reply[1]), to_utf8(reply[2]), to_utf8(reply[3]))
-
     def loop(self):
         while True:
             events = self._client.rtm_read()
@@ -114,7 +107,20 @@ class Message(object):
         self._client = slackclient
         self._body = body
 
+    def _get_user_id(self):
+        if 'user' in self._body:
+            return self._body['user']
+
+        return self._client.find_user_by_name(self._body['username'])
+
+    def _gen_at_message(self, text):
+        text = '<@%s>: %s' % (self._get_user_id(), text)
+        return text
+
     def reply(self, text):
+        chan = self._body['channel']
+        if chan.startswith('C'):
+            text = self._gen_at_message(text)
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 

@@ -10,6 +10,7 @@ class Driver(object):
     def __init__(self, driver_apitoken, driver_username, testbot_username, channel):
         self.slacker = slacker.Slacker(driver_apitoken)
         self.driver_username = driver_username
+        self.driver_userid = None
         self.test_channel = channel
         self.users = {}
         self.testbot_username = testbot_username
@@ -77,6 +78,8 @@ class Driver(object):
             raise AssertionError('expected to get message like "%s", but got nothing' % match)
 
     def _has_got_message(self, channel, match, start=None, end=None):
+        if channel.startswith('C'):
+            match = r'\<@%s\>: %s' % (self.driver_userid, match)
         oldest = start or self._start_ts
         latest = end or time.time()
         func = self.slacker.channels.history if channel.startswith('C') \
@@ -93,6 +96,7 @@ class Driver(object):
             self.users[user['name']] = user['id']
 
         self.testbot_userid = self.users[self.testbot_username]
+        self.driver_userid = self.users[self.driver_username]
 
     def _start_dm_channel(self):
         """Start a slack direct messages channel with the test bot"""
