@@ -7,7 +7,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: lins05
   password:
-    secure: MQ3VEWLeBp9Q4h+GK+fYb+6nNUaVHCW0u2Ufy8LTpUR8hLspTyITscR5yYQwgIJlMj8hWpiP6LufEt53GQz9uvaFnDQqV1UpR97RsdYXVy41kLid2T2LBmLhxad9cjeYXAiPp8rzKFvoASAuL10BSjXtiif1+GPv9ijsT6xR9z8=
+    secure: "diOVQyr+9Mr3UNSYqFkFLWs2+4+Rfp64x98Pt7FlWugO9TAoPOQSXoYCs71pszjkY7XNuo5mrbOvO6d8K6uAzQEYs/w+VXzxFcp2Cf/9oocvhQGU42M2r3Pwi89GMa1JcF81bUP+0OucAPCSOGeqyzemGKueb7fmin8PQwTE+5w="
   on:
     tags: true
     repo: lins05/slackbot
