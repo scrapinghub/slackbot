@@ -69,3 +69,12 @@ from slackbot.bot import respond_to
 def giveme(message, something):
     message.reply('Here is %s' % something)
 ```
+
+And add the plugins module to `PLUGINS` list of slackbot settings, e.g local_settings.py:
+
+```python
+PLUGINS = [
+    'slackbot.plugins',
+    'mybot.plugins',
+]
+```

@@ -1,6 +1,7 @@
 # coding: UTF-8
 
 from glob import glob
+import imp
 import importlib
 import logging
 import os
@@ -21,7 +22,7 @@ class Bot(object):
         self._dispatcher = MessageDispatcher(self._client, self._plugins)
 
     def run(self):
-        self._plugins.init()
+        self._plugins.init_plugins()
         self._dispatcher.start()
         self._client.rtm_connect()
         logger.info('connected to slack RTM api')
@@ -33,11 +34,24 @@ class PluginsManager(object):
     def __init__(self):
         pass
 
-    def init(self):
-        plugin_prefix = 'slackbot.plugins'
-        plugindir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plugins')
-        for plugin in glob('{}/[!_]*.py'.format(plugindir)):
-            module = '.'.join((plugin_prefix, os.path.split(plugin)[-1][:-3]))
+    def init_plugins(self):
+        if hasattr(settings, 'PLUGINS'):
+            plugins = settings.PLUGINS
+        else:
+            plugins = 'slackbot.plugins'
+
+        for plugin in plugins:
+            self._load_plugins(plugin)
+
+    def _load_plugins(self, plugin):
+        logger.info('loading plugin %s', plugin)
+        path_name = None
+        for mod in plugin.split('.'):
+            if path_name is not None:
+                path_name = [path_name]
+            _, path_name, _ = imp.find_module(mod, path_name)
+        for pyfile in glob('{}/[!_]*.py'.format(path_name)):
+            module = '.'.join((plugin, os.path.split(pyfile)[-1][:-3]))
             try:
                 importlib.import_module(module)
             except:
