@@ -1,34 +1,18 @@
+import sys
 import logging
 import logging.config
 from slackbot import settings
 from slackbot.bot import Bot
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s:%(lineno)s %(message)s'
-        },
-    },
-    'handlers': {
-        'default': {
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-            'formatter':'standard',
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['default'],
-            'level': 'DEBUG' if settings.DEBUG else 'INFO',
-            'propagate': True
-        },
-    }
-}
-
 def main():
-    logging.config.dictConfig(LOGGING)
+    kw = {
+        'format': '[%(asctime)s] %(message)s',
+        'datefmt': '%m/%d/%Y %H:%M:%S',
+        'level': logging.DEBUG if settings.DEBUG else logging.INFO,
+        'stream': sys.stdout,
+    }
+    logging.basicConfig(**kw)
+    logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
     bot = Bot()
     bot.run()
 

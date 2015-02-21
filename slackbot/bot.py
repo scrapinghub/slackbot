@@ -44,7 +44,7 @@ class PluginsManager(object):
             self._load_plugins(plugin)
 
     def _load_plugins(self, plugin):
-        logger.info('loading plugin %s', plugin)
+        logger.info('loading plugin "%s"', plugin)
         path_name = None
         for mod in plugin.split('.'):
             if path_name is not None:
@@ -67,6 +67,6 @@ class PluginsManager(object):
 def respond_to(matchstr):
     def wrapper(func):
         PluginsManager.commands[re.compile(matchstr)] = func
-        logger.info('registered plugin "%s" to %s', func.__name__, matchstr)
+        logger.info('registered plugin "%s" to "%s"', func.__name__, matchstr)
         return func
     return wrapper
