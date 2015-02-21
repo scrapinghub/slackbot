@@ -1,12 +1,13 @@
 import os
 
 DEBUG = False
-SLACK_TOKEN = "<your-token-goes-here>"
+
+for key in os.environ:
+    if key[:9] == 'SLACKBOT_':
+        name = key[9:]
+        globals()[name] = os.environ[key]
 
 try:
     from local_settings import *
 except ImportError:
     pass
-
-if 'SLACK_TOKEN' in os.environ:
-    SLACK_TOKEN = os.environ['SLACK_TOKEN']

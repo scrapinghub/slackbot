@@ -21,7 +21,8 @@ def _start_bot_process():
         'run.py',
     ]
     env = dict(os.environ)
-    env['SLACK_TOKEN'] = testbot_apitoken
+    env['SLACKBOT_API_TOKEN'] = testbot_apitoken
+    env['SLACKBOT_TEST'] = '1'
     return subprocess.Popen(args, env=env)
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101
