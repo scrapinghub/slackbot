@@ -39,10 +39,8 @@ class MessageDispatcher(object):
             return
 
     def _on_new_message(self, msg):
-        # ignore bot messages and edits
+        # ignore edits
         subtype = msg.get('subtype', '')
-        # if subtype == 'bot_message' or subtype == 'message_changed':
-        #     return
         if subtype == 'message_changed':
             return
 
@@ -51,7 +49,6 @@ class MessageDispatcher(object):
             msguser = self._client.users.get(msg['user'])
             username = msguser['name']
         except KeyError:
-            logger.debug('msg {0} has no user'.format(msg))
             if 'username' in msg:
                 username = msg['username']
             else:
