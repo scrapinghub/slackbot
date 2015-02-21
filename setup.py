@@ -4,10 +4,10 @@ from setuptools import setup, find_packages
 __version__ = open(join(dirname(__file__), 'slackbot/VERSION')).read().strip()
 
 install_requires = (
-    'requests'
-    'websocket-client',
-    'importlib',
-    'slacker',
+    'requests>=2.4.0',
+    'websocket-client>=0.22.0',
+    'importlib>=1.0.3',
+    'slacker>=0.5.5',
 )
 
 excludes = (
