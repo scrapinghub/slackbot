@@ -18,7 +18,6 @@ class SlackClient(object):
         self.users = {}
         self.channels = {}
         self.connected = False
-        self.pingcounter = 0
         self.webapi = slacker.Slacker(self.token)
 
         if connect:

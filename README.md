@@ -51,7 +51,7 @@ Now you can talk to your bot in your slack client!
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
 
-To write a new plugin, simple create a function decorated by `slackbot.bot.respond_to`:
+To write a new plugin, simplely create a function decorated by `slackbot.bot.respond_to`:
 
 ```python
 from slackbot.bot import respond_to
