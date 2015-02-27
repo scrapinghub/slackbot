@@ -35,12 +35,20 @@ class Driver(object):
         self._join_test_channel()
 
     def wait_for_bot_online(self):
+        self._wait_for_bot_presense(True)
+
+    def wait_for_bot_offline(self):
+        self._wait_for_bot_presense(False)
+
+    def _wait_for_bot_presense(self, online):
         for _ in xrange(10):
             time.sleep(2)
-            if self._is_testbot_online():
+            if online and self._is_testbot_online():
+                break
+            if not online and not self._is_testbot_online():
                 break
         else:
-            raise AssertionError('test bot is not online')
+            raise AssertionError('test bot is still %s' % ('offline' if online else 'online'))
 
     def send_direct_message(self, msg):
         self._send_message_to_bot(self.dm_chan, msg)

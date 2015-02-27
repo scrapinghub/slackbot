@@ -1,5 +1,9 @@
 language: python
 python: 2.7
+before_install:
+  - cp scripts/slackbot-test-ctl /usr/local/bin
+  - slackbot-test-ctl init
+  - slackbot-test-ctl startproxy
 install: pip install -r requirements.txt
 script: py.test -s -vv
 deploy:

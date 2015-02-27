@@ -1,0 +1,60 @@
+#!/bin/bash
+
+set -x -e
+
+ssconfig=/tmp/config.json
+tsocksconfig=/tmp/tsocks.conf
+export TSOCKS_CONF_FILE=$tsocksconfig
+
+init_tsocks() {
+    cat >$ssconfig <<EOF
+{
+    "server":"127.0.0.1",
+    "server_port":8800,
+    "local_address": "127.0.0.1",
+    "local_port":1800,
+    "password":"password",
+    "timeout":600,
+    "method":"aes-256-cfb"
+}
+EOF
+
+    cat >$tsocksconfig <<EOF
+local = 127.0.0.0/255.0.0.0
+server = 127.0.0.1
+server_type = 5
+server_port = 1800
+EOF
+}
+
+main() {
+  local action=$1; shift
+  case $action in
+    init)
+      which sslocal || sudo pip install shadowsocks
+      which tsocks || sudo apt-get install tsocks
+      init_tsocks
+      ;;
+    startproxy)
+      pgrep -f "sslocal -c $ssconfig" || {
+          sslocal -c $ssconfig 1>&2 2>/tmp/sslocal.log &
+      }
+      pgrep -f "ssserver -c $ssserver" || {
+          ssserver -c $ssconfig 1>&2 2>/tmp/ssserver.log &
+      }
+      ;;
+    stopproxy)
+      pkill -f "sslocal -c $ssconfig"
+      pkill -f "ssserver -c $ssconfig"
+      ;;
+    run)
+      tsocks "$@"
+      ;;
+    *)
+      echo "WARNING: unknown command $action"
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

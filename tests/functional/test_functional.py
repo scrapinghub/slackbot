@@ -5,6 +5,7 @@ the tests agains the bot.
 """
 
 import os
+import time
 import subprocess
 import pytest
 from os.path import join, abspath, dirname, basename
@@ -14,12 +15,21 @@ from tests.functional.settings import (
     driver_apitoken, driver_username, test_channel
 )
 
+TRAVIS = 'TRAVIS' in os.environ
+
+def stop_proxy():
+    os.system('slackbot-test-ctl stopproxy')
+
+def start_proxy():
+    os.system('slackbot-test-ctl startproxy')
 
 def _start_bot_process():
     args = [
         'python',
         'run.py',
     ]
+    if TRAVIS:
+        args = ['slackbot-test-ctl', 'run'] + args
     env = dict(os.environ)
     env['SLACKBOT_API_TOKEN'] = testbot_apitoken
     env['SLACKBOT_TEST'] = '1'
@@ -68,3 +78,12 @@ def test_bot_reply_to_channel_message(driver):
 def test_bot_ignores_non_related_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.ensure_no_channel_reply_from_bot()
+
+@pytest.mark.skipif(not TRAVIS, reason="only run reconnect test travis") # pylint: disable=E1101
+def test_bot_reconnect(driver):
+    driver.wait_for_bot_online()
+    stop_proxy()
+    driver.wait_for_bot_offline()
+    start_proxy()
+    driver.wait_for_bot_online()
+    test_bot_respond_to_simple_message(driver)
