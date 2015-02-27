@@ -7,6 +7,7 @@ A chat bot for [Slack](https://slack.com) based on [llimllib/slask](https://gith
 * Based on slack [Real Time Messaging API](https://api.slack.com/rtm)
 * Simple plugins mechanism
 * Messages can be handled concurrently
+* Automatically reconnect to slack when connection is lost
 
 ## Installation
 
@@ -70,7 +71,7 @@ def giveme(message, something):
     message.reply('Here is %s' % something)
 ```
 
-And add the plugins module to `PLUGINS` list of slackbot settings, e.g local_settings.py:
+And add the plugins module to `PLUGINS` list of slackbot settings, e.g. local_settings.py:
 
 ```python
 PLUGINS = [
