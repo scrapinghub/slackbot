@@ -1,12 +1,17 @@
 from __future__ import print_function
 import os
 import json
+import logging
+import time
 import slacker
 
-from websocket import create_connection
+from websocket import (
+    create_connection, WebSocketException, WebSocketConnectionClosedException
+)
 
-from slackbot import settings
 from slackbot.utils import to_utf8
+
+logger = logging.getLogger(__name__)
 
 class SlackClient(object):
     def __init__(self, token, connect=True):
@@ -26,6 +31,16 @@ class SlackClient(object):
     def rtm_connect(self):
         reply = self.webapi.rtm.start().body
         self.parse_slack_login_data(reply)
+
+    def reconnect(self):
+        while True:
+            try:
+                self.rtm_connect()
+                logger.warning('reconnected to slack rtm websocket')
+                return
+            except:
+                logger.exception('failed to reconnect')
+                time.sleep(1)
 
     def parse_slack_login_data(self, login_data):
         self.login_data = login_data
@@ -58,6 +73,12 @@ class SlackClient(object):
         while True:
             try:
                 data += '{0}\n'.format(self.websocket.recv())
+            except WebSocketException, e:
+                if isinstance(e, WebSocketConnectionClosedException):
+                    logger.warning('lost websocket connection, try to reconnect now')
+                else:
+                    logger.warning('websocket exception: %s', e)
+                self.reconnect()
             except:
                 return data.rstrip()
 
