@@ -92,7 +92,7 @@ class MessageDispatcher(object):
 
     def _default_reply(self, msg):
         default_reply = [
-            u'Bad command "%s", You can ask me one of the following questsion:\n' % msg['text'],
+            u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
         default_reply += [u'    • %s' % str(f.__name__) for f in self._plugins.commands.itervalues()]
 
