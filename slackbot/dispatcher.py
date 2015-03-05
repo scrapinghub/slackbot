@@ -12,7 +12,7 @@ from slackbot.utils import to_utf8, WorkerPool
 
 logger = logging.getLogger(__name__)
 
-AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>: (.*)$')
+AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
 
 class MessageDispatcher(object):
     def __init__(self, slackclient, plugins):

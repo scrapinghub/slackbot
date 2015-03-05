@@ -53,9 +53,10 @@ class Driver(object):
     def send_direct_message(self, msg):
         self._send_message_to_bot(self.dm_chan, msg)
 
-    def send_channel_message(self, msg, tobot=True):
+    def send_channel_message(self, msg, tobot=True, colon=True):
+        colon = ':' if colon else ''
         if tobot:
-            msg = '<@%s>: %s' % (self.testbot_userid, msg)
+            msg = '<@%s>%s %s' % (self.testbot_userid, colon, msg)
         self._send_message_to_bot(self.cm_chan, msg)
 
     def wait_for_bot_direct_message(self, match):

@@ -74,6 +74,8 @@ def test_bot_upload_file_from_link(driver):
 def test_bot_reply_to_channel_message(driver):
     driver.send_channel_message('hello')
     driver.wait_for_bot_channel_message('hello!')
+    driver.send_channel_message('hello', colon=False)
+    driver.wait_for_bot_channel_message('hello!')
 
 def test_bot_ignores_non_related_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
