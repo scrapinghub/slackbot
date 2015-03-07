@@ -1,4 +1,4 @@
-#coding: UTF-8
+# -*- coding: utf8 -*-
 
 from glob import glob
 import logging

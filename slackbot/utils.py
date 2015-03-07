@@ -1,4 +1,5 @@
-#coding: UTF-8
+# -*- coding: utf8 -*-
+
 import os
 import logging
 import tempfile
