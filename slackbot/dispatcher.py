@@ -65,7 +65,7 @@ class MessageDispatcher(object):
         text = msg.get('text', '')
         channel = msg['channel']
 
-        if channel[0] == 'C':
+        if channel[0] == 'C' or channel[0] == 'G':
             m = AT_MESSAGE_MATCHER.match(text)
             if not m:
                 return
@@ -111,12 +111,12 @@ class Message(object):
         return self._client.find_user_by_name(self._body['username'])
 
     def _gen_at_message(self, text):
-        text = '<@%s>: %s' % (self._get_user_id(), text)
+        text = '<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
     def reply(self, text):
         chan = self._body['channel']
-        if chan.startswith('C'):
+        if chan.startswith('C') or chan.startswith('G'):
             text = self._gen_at_message(text)
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
