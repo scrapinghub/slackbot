@@ -5,14 +5,13 @@ the tests agains the bot.
 """
 
 import os
-import time
 import subprocess
 import pytest
 from os.path import join, abspath, dirname, basename
 from tests.functional.driver import Driver
 from tests.functional.settings import (
     testbot_apitoken, testbot_username,
-    driver_apitoken, driver_username, test_channel
+    driver_apitoken, driver_username, test_channel, test_group
 )
 
 TRAVIS = 'TRAVIS' in os.environ
@@ -37,7 +36,11 @@ def _start_bot_process():
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101
 def driver():
-    driver = Driver(driver_apitoken, driver_username, testbot_username, test_channel)
+    driver = Driver(driver_apitoken,
+                    driver_username,
+                    testbot_username,
+                    test_channel,
+                    test_group)
     driver.start()
     p = _start_bot_process()
     driver.wait_for_bot_online()
@@ -76,6 +79,12 @@ def test_bot_reply_to_channel_message(driver):
     driver.wait_for_bot_channel_message('hello!')
     driver.send_channel_message('hello', colon=False)
     driver.wait_for_bot_channel_message('hello!')
+
+def test_bot_reply_to_group_message(driver):
+    driver.send_group_message('hello')
+    driver.wait_for_bot_group_message('hello!')
+    driver.send_group_message('hello', colon=False)
+    driver.wait_for_bot_group_message('hello!')
 
 def test_bot_ignores_non_related_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)

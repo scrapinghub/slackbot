@@ -6,6 +6,7 @@ KEYS = (
     'driver_apitoken',
     'driver_username',
     'test_channel',
+    'test_group',
 )
 
 testbot_apitoken = None
@@ -13,6 +14,7 @@ testbot_username = None
 driver_apitoken = None
 driver_username = None
 test_channel = None
+test_group = None
 
 for key in KEYS:
     envkey = 'SLACKBOT_' + key.upper()

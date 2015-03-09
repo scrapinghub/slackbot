@@ -11,11 +11,12 @@ class Driver(object):
     """Function tests driver. It handles the communication with slack api, so that
     the tests code can concentrate on higher level logic.
     """
-    def __init__(self, driver_apitoken, driver_username, testbot_username, channel):
+    def __init__(self, driver_apitoken, driver_username, testbot_username, channel, group):
         self.slacker = slacker.Slacker(driver_apitoken)
         self.driver_username = driver_username
         self.driver_userid = None
         self.test_channel = channel
+        self.test_group = group
         self.users = {}
         self.testbot_username = testbot_username
         self.testbot_userid = None
@@ -23,6 +24,8 @@ class Driver(object):
         self.cm_chan = None
         # direct message channel
         self.dm_chan = None
+        # private group channel
+        self.gm_chan = None
         self._start_ts = time.time()
         self._websocket = None
         self.events = []
@@ -53,17 +56,26 @@ class Driver(object):
     def send_direct_message(self, msg):
         self._send_message_to_bot(self.dm_chan, msg)
 
-    def send_channel_message(self, msg, tobot=True, colon=True):
+    def _send_channel_message(self, chan, msg, tobot=True, colon=True):
         colon = ':' if colon else ''
         if tobot:
             msg = '<@%s>%s %s' % (self.testbot_userid, colon, msg)
-        self._send_message_to_bot(self.cm_chan, msg)
+        self._send_message_to_bot(chan, msg)
+
+    def send_channel_message(self, msg, tobot=True, colon=True):
+        self._send_channel_message(self.cm_chan, msg, tobot, colon)
+
+    def send_group_message(self, msg, tobot=True, colon=True):
+        self._send_channel_message(self.gm_chan, msg, tobot, colon)
 
     def wait_for_bot_direct_message(self, match):
         self._wait_for_bot_message(self.dm_chan, match)
 
     def wait_for_bot_channel_message(self, match):
         self._wait_for_bot_message(self.cm_chan, match)
+
+    def wait_for_bot_group_message(self, match):
+        self._wait_for_bot_message(self.gm_chan, match)
 
     def ensure_no_channel_reply_from_bot_api(self, wait=5):
         for _ in xrange(wait):
@@ -120,7 +132,7 @@ class Driver(object):
         return False
 
     def _has_got_message_rtm(self, channel, match):
-        if channel.startswith('C'):
+        if channel.startswith('C') or channel.startswith('G'):
             match = r'\<@%s\>: %s' % (self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
@@ -197,9 +209,23 @@ class Driver(object):
         self.cm_chan = response.body['channel']['id']
         self._invite_testbot_to_channel()
 
+        groups = self.slacker.groups.list(self.test_group).body['groups']
+        for group in groups:
+            if self.test_group == group['name']:
+                self.gm_chan = group['id']
+                self._invite_testbot_to_group(group)
+                break
+        else:
+            raise RuntimeError('Have you created the private group {} for testing?'.format(
+                self.group_name))
+
     def _invite_testbot_to_channel(self):
         if self.testbot_userid not in self.slacker.channels.info(self.cm_chan).body['channel']['members']:
             self.slacker.channels.invite(self.cm_chan, self.testbot_userid)
+
+    def _invite_testbot_to_group(self, group):
+        if self.testbot_userid not in group['members']:
+            self.slacker.groups.invite(self.gm_chan, self.testbot_userid)
 
     def _is_bot_message(self, msg):
         if msg['type'] != 'message':
