@@ -58,6 +58,10 @@ def test_bot_respond_to_simple_message(driver):
     driver.send_direct_message('hello')
     driver.wait_for_bot_direct_message('hello!')
 
+def test_bot_respond_to_simple_message_case_insensitive(driver):
+    driver.send_direct_message('hEllO')
+    driver.wait_for_bot_direct_message('hello!')
+
 def test_bot_default_reply(driver):
     driver.send_direct_message('youdonunderstandthiscommand donnot you')
     driver.wait_for_bot_direct_message('.*You can ask me.*')
