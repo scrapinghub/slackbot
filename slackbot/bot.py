@@ -73,9 +73,9 @@ class PluginsManager(object):
                 return self.commands[matcher], to_utf8(m.groups())
         return None, None
 
-def respond_to(matchstr):
+def respond_to(matchstr, flags=0):
     def wrapper(func):
-        PluginsManager.commands[re.compile(matchstr)] = func
+        PluginsManager.commands[re.compile(matchstr, flags)] = func
         logger.info('registered plugin "%s" to "%s"', func.__name__, matchstr)
         return func
     return wrapper
