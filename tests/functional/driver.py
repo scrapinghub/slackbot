@@ -8,7 +8,7 @@ import websocket
 
 
 class Driver(object):
-    """Function tests driver. It handles the communication with slack api, so that
+    """Functional tests driver. It handles the communication with slack api, so that
     the tests code can concentrate on higher level logic.
     """
     def __init__(self, driver_apitoken, driver_username, testbot_username, channel, group):

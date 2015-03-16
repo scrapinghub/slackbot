@@ -63,7 +63,7 @@ def test_bot_respond_to_simple_message_case_insensitive(driver):
     driver.wait_for_bot_direct_message('hello!')
 
 def test_bot_default_reply(driver):
-    driver.send_direct_message('youdonunderstandthiscommand donnot you')
+    driver.send_direct_message('youdontunderstandthiscommand do you')
     driver.wait_for_bot_direct_message('.*You can ask me.*')
 
 def test_bot_upload_file(driver):
@@ -94,7 +94,7 @@ def test_bot_ignores_non_related_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.ensure_no_channel_reply_from_bot()
 
-@pytest.mark.skipif(not TRAVIS, reason="only run reconnect test travis") # pylint: disable=E1101
+@pytest.mark.skipif(not TRAVIS, reason="only run reconnect tests on travis builds") # pylint: disable=E1101
 def test_bot_reconnect(driver):
     driver.wait_for_bot_online()
     stop_proxy()
