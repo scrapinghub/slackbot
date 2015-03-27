@@ -24,9 +24,12 @@ class MessageDispatcher(object):
         self._pool.start()
 
     def dispatch_msg(self, msg):
+        category = msg[0]
+        msg = msg[1]
         text = msg['text']
-        func, args = self._plugins.get_plugin(text)
+        for func, args in self._plugins.get_plugins(category, text):
         if not func:
+                if category == 'respond_to':
             self._default_reply(msg)
         else:
             try:
@@ -57,9 +60,11 @@ class MessageDispatcher(object):
         if username == botname or username == 'slackbot':
             return
 
+        self._pool.add_task(('subscribe_to', msg))
+
         msg = self.filter_text(msg)
         if msg:
-            self._pool.add_task(msg)
+            self._pool.add_task(('respond_to', msg))
 
     def filter_text(self, msg):
         text = msg.get('text', '')
@@ -94,7 +99,7 @@ class MessageDispatcher(object):
         default_reply = [
             u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
-        default_reply += [u'    • `%s`' % str(p.pattern) for p in self._plugins.commands.iterkeys()]
+        default_reply += [u'    • `%s`' % str(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
 
         self._client.rtm_send_message(msg['channel'],
                                      '\n'.join(to_utf8(default_reply)))
