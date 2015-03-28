@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class Bot(object):
     def __init__(self):
-        self._client = SlackClient(settings.API_TOKEN)
+        self._client = SlackClient(settings.API_TOKEN, settings.BOT_EMOJI)
         self._plugins = PluginsManager()
         self._dispatcher = MessageDispatcher(self._client, self._plugins)
 

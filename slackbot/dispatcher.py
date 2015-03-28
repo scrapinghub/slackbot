@@ -28,18 +28,18 @@ class MessageDispatcher(object):
         msg = msg[1]
         text = msg['text']
         for func, args in self._plugins.get_plugins(category, text):
-        if not func:
+            if not func:
                 if category == 'respond_to':
-            self._default_reply(msg)
-        else:
-            try:
-                func(Message(self._client, msg), *args)
-            except:
-                logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
-                reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
-                reply += '```\n%s\n```' % traceback.format_exc()
+                    self._default_reply(msg)
+            else:
+                try:
+                    func(Message(self._client, msg), *args)
+                except:
+                    logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
+                    reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
+                    reply += '```\n%s\n```' % traceback.format_exc()
                 self._client.rtm_send_message(msg['channel'], reply)
-            return
+                    return
 
     def _on_new_message(self, msg):
         # ignore edits
@@ -123,9 +123,16 @@ class Message(object):
         chan = self._body['channel']
         if chan.startswith('C') or chan.startswith('G'):
             text = self._gen_at_message(text)
-        self._client.rtm_send_message(
+        self.send(text)
+
+    def send(self, text):
+        self._client.send_message(
             self._body['channel'], to_utf8(text))
 
     @property
     def channel(self):
         return self._client.get_channel(self._body['channel'])
+
+    @property
+    def body(self):
+        return self._body
