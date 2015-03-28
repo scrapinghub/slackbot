@@ -39,7 +39,6 @@ class MessageDispatcher(object):
                     reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
                     reply += '```\n%s\n```' % traceback.format_exc()
                     self._client.rtm_send_message(msg['channel'], reply)
-                return
 
     def _on_new_message(self, msg):
         # ignore edits
