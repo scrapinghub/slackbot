@@ -27,18 +27,21 @@ class MessageDispatcher(object):
         category = msg[0]
         msg = msg[1]
         text = msg['text']
+        responded = False
         for func, args in self._plugins.get_plugins(category, text):
-            if not func:
-                if category == 'respond_to':
-                    self._default_reply(msg)
-            else:
+            if func:
                 try:
                     func(Message(self._client, msg), *args)
+                    responded = True
                 except:
                     logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
                     reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
                     reply += '```\n%s\n```' % traceback.format_exc()
                     self._client.rtm_send_message(msg['channel'], reply)
+
+        if responded == False and category == 'respond_to':
+            self._default_reply(msg)
+
 
     def _on_new_message(self, msg):
         # ignore edits
@@ -59,11 +62,12 @@ class MessageDispatcher(object):
         if username == botname or username == 'slackbot':
             return
 
-        self._pool.add_task(('subscribe_to', msg))
+        msgRespondTo = self.filter_text(msg)
+        if msgRespondTo:
+            self._pool.add_task(('respond_to', msgRespondTo))
+        else:
+            self._pool.add_task(('subscribe_to', msg))
 
-        msg = self.filter_text(msg)
-        if msg:
-            self._pool.add_task(('respond_to', msg))
 
     def filter_text(self, msg):
         text = msg.get('text', '')
