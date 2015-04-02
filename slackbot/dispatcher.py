@@ -24,19 +24,24 @@ class MessageDispatcher(object):
         self._pool.start()
 
     def dispatch_msg(self, msg):
+        category = msg[0]
+        msg = msg[1]
         text = msg['text']
-        func, args = self._plugins.get_plugin(text)
-        if not func:
+        responded = False
+        for func, args in self._plugins.get_plugins(category, text):
+            if func:
+                try:
+                    func(Message(self._client, msg), *args)
+                    responded = True
+                except:
+                    logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
+                    reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
+                    reply += '```\n%s\n```' % traceback.format_exc()
+                    self._client.rtm_send_message(msg['channel'], reply)
+
+        if responded == False and category == 'respond_to':
             self._default_reply(msg)
-        else:
-            try:
-                func(Message(self._client, msg), *args)
-            except:
-                logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
-                reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
-                reply += '```\n%s\n```' % traceback.format_exc()
-                self._client.rtm_send_message(msg['channel'], reply)
-            return
+
 
     def _on_new_message(self, msg):
         # ignore edits
@@ -57,9 +62,12 @@ class MessageDispatcher(object):
         if username == botname or username == 'slackbot':
             return
 
-        msg = self.filter_text(msg)
-        if msg:
-            self._pool.add_task(msg)
+        msgRespondTo = self.filter_text(msg)
+        if msgRespondTo:
+            self._pool.add_task(('respond_to', msgRespondTo))
+        else:
+            self._pool.add_task(('listen_to', msg))
+
 
     def filter_text(self, msg):
         text = msg.get('text', '')
@@ -94,7 +102,7 @@ class MessageDispatcher(object):
         default_reply = [
             u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
-        default_reply += [u'    • `%s`' % str(p.pattern) for p in self._plugins.commands.iterkeys()]
+        default_reply += [u'    • `%s`' % str(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
 
         self._client.rtm_send_message(msg['channel'],
                                      '\n'.join(to_utf8(default_reply)))
@@ -114,13 +122,33 @@ class Message(object):
         text = '<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
-    def reply(self, text):
+    def _gen_reply(self, text):
         chan = self._body['channel']
         if chan.startswith('C') or chan.startswith('G'):
-            text = self._gen_at_message(text)
+            return self._gen_at_message(text)
+        else:
+            return text
+
+    def reply(self, text):
+        text = self._gen_reply(text)
+        self.send(text)
+
+    def send(self, text):
+        self._client.send_message(
+            self._body['channel'], to_utf8(text))
+
+    def rtm_reply(self, text):
+        text = self._gen_reply(text)
+        self.send_rtm(text)
+
+    def rtm_send(self, text):
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
     @property
     def channel(self):
         return self._client.get_channel(self._body['channel'])
+
+    @property
+    def body(self):
+        return self._body
