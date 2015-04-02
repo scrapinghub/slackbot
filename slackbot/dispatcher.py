@@ -66,7 +66,7 @@ class MessageDispatcher(object):
         if msgRespondTo:
             self._pool.add_task(('respond_to', msgRespondTo))
         else:
-            self._pool.add_task(('subscribe_to', msg))
+            self._pool.add_task(('listen_to', msg))
 
 
     def filter_text(self, msg):
@@ -122,14 +122,27 @@ class Message(object):
         text = '<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
-    def reply(self, text):
+    def _gen_reply(self, text):
         chan = self._body['channel']
         if chan.startswith('C') or chan.startswith('G'):
-            text = self._gen_at_message(text)
+            return self._gen_at_message(text)
+        else:
+            return text
+
+    def reply(self, text):
+        text = self._gen_reply(text)
         self.send(text)
 
     def send(self, text):
         self._client.send_message(
+            self._body['channel'], to_utf8(text))
+
+    def rtm_reply(self, text):
+        text = self._gen_reply(text)
+        self.send_rtm(text)
+
+    def rtm_send(self, text):
+        self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
     @property

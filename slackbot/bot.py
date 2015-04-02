@@ -42,7 +42,7 @@ class Bot(object):
             self._client.ping()
 
 class PluginsManager(object):
-    commands = { 'respond_to': {}, 'subscribe_to': {} }
+    commands = { 'respond_to': {}, 'listen_to': {} }
 
     def __init__(self):
         pass
@@ -88,9 +88,9 @@ def respond_to(matchstr, flags=0):
         return func
     return wrapper
 
-def subscribe_to(matchstr, flags=0):
+def listen_to(matchstr, flags=0):
     def wrapper(func):
-        PluginsManager.commands['subscribe_to'][re.compile(matchstr, flags)] = func
-        logger.info('registered subscribe_to plugin "%s" to "%s"', func.__name__, matchstr)
+        PluginsManager.commands['listen_to'][re.compile(matchstr, flags)] = func
+        logger.info('registered listen_to plugin "%s" to "%s"', func.__name__, matchstr)
         return func
     return wrapper
