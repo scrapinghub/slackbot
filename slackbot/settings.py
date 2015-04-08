@@ -6,6 +6,17 @@ PLUGINS = [
     'slackbot.plugins',
 ]
 
+# API_TOKEN = '###token###'
+
+'''
+If you use Slack Web API to send messages (with send() or reply()),
+you can customize the bot logo by providing Icon or Emoji.
+If you use Slack RTM API to send messages (with rtm_send() or rtm_reply()),
+the used icon comes from bot settings and Icon or Emoji has no effect.
+'''
+# BOT_ICON = 'http://lorempixel.com/64/64/abstract/7/'
+# BOT_EMOJI = ':godmode:'
+
 for key in os.environ:
     if key[:9] == 'SLACKBOT_':
         name = key[9:]
