@@ -134,14 +134,6 @@ class Message(object):
         self.send(text)
 
     def send(self, text):
-        self._client.send_message(
-            self._body['channel'], to_utf8(text))
-
-    def rtm_reply(self, text):
-        text = self._gen_reply(text)
-        self.send_rtm(text)
-
-    def rtm_send(self, text):
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
