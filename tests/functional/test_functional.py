@@ -110,6 +110,14 @@ def test_bot_ignores_non_related_message_response_tochannel(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.ensure_only_specificmessage_from_bot('hello channel!', tosender=False)
 
+def test_bot_reply_to_channel_message_multiple_decorators(driver):
+    driver.send_channel_message('hello_decorators')
+    driver.wait_for_bot_channel_message('hello!', tosender=False)
+    driver.send_channel_message('hello_decorators', tobot=False)
+    driver.wait_for_bot_channel_message('hello!', tosender=False)
+    driver.send_direct_message('hello_decorators')
+    driver.wait_for_bot_direct_message('hello!')
+
 @pytest.mark.skipif(not TRAVIS, reason="only run reconnect tests on travis builds") # pylint: disable=E1101
 def test_bot_reconnect(driver):
     driver.wait_for_bot_online()
