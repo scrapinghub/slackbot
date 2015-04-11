@@ -69,34 +69,31 @@ class Driver(object):
         self._send_channel_message(self.gm_chan, msg, tobot, colon)
 
     def wait_for_bot_direct_message(self, match):
-        self._wait_for_bot_message(self.dm_chan, match)
+        self._wait_for_bot_message(self.dm_chan, match, tosender=False)
 
-    def wait_for_bot_channel_message(self, match):
-        self._wait_for_bot_message(self.cm_chan, match)
+    def wait_for_bot_direct_messages(self, matches):
+        for match in matches:
+            self._wait_for_bot_message(self.dm_chan, match, tosender=False)
+
+    def wait_for_bot_channel_message(self, match, tosender=True):
+        self._wait_for_bot_message(self.cm_chan, match, tosender=tosender)
 
     def wait_for_bot_group_message(self, match):
-        self._wait_for_bot_message(self.gm_chan, match)
+        self._wait_for_bot_message(self.gm_chan, match, tosender=True)
 
-    def ensure_no_channel_reply_from_bot_api(self, wait=5):
-        for _ in xrange(wait):
-            time.sleep(1)
-            response = self.slacker.channels.history(
-                self.cm_chan, oldest=self._start_ts, latest=time.time())
-            for msg in response.body['messages']:
-                if self._is_bot_message(msg):
-                    raise AssertionError(
-                        'expected to get nothing, but got message "%s"' % msg['text'])
+    def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
+        if tosender is True:
+            match = r'^\<@%s\>: %s$' % (self.driver_userid, match)
+        else:
+            match = r'^%s$' % match
 
-    def ensure_no_channel_reply_from_bot_rtm(self, wait=5):
         for _ in xrange(wait):
             time.sleep(1)
             with self._events_lock:
                 for event in self.events:
-                    if self._is_bot_message(event):
+                    if self._is_bot_message(event) and re.match(match, event['text'], re.DOTALL) is None:
                         raise AssertionError(
-                            'expected to get nothing, but got message "%s"' % event['text'])
-
-    ensure_no_channel_reply_from_bot = ensure_no_channel_reply_from_bot_rtm
+                            'expected to get message matching "%s", but got message "%s"' % (match, event['text']))
 
     def wait_for_file_uploaded(self, name, maxwait=60):
         for _ in xrange(maxwait):
@@ -110,10 +107,10 @@ class Driver(object):
         self._start_ts = time.time()
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
 
-    def _wait_for_bot_message(self, channel, match, maxwait=60):
+    def _wait_for_bot_message(self, channel, match, maxwait=60, tosender=True):
         for _ in xrange(maxwait):
             time.sleep(1)
-            if self._has_got_message_rtm(channel, match):
+            if self._has_got_message_rtm(channel, match, tosender):
                 break
         else:
             raise AssertionError('expected to get message like "%s", but got nothing' % match)
@@ -131,8 +128,8 @@ class Driver(object):
                 return True
         return False
 
-    def _has_got_message_rtm(self, channel, match):
-        if channel.startswith('C') or channel.startswith('G'):
+    def _has_got_message_rtm(self, channel, match, tosender=True):
+        if tosender is True:
             match = r'\<@%s\>: %s' % (self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
