@@ -129,11 +129,42 @@ class Message(object):
         else:
             return text
 
+    def reply_webapi(self, text):
+        """
+            Send a reply to the sender using Web API
+
+            (This function supports formatted message
+            when using a bot integration)
+        """        text = self._gen_reply(text)
+        self.send_webapi(text)
+
+    def send_webapi(self, text):
+        """
+            Send a reply using Web API
+
+            (This function supports formatted message
+            when using a bot integration)
+        """
+        self._client.send_message(
+            self._body['channel'], to_utf8(text))
+
     def reply(self, text):
+        """
+            Send a reply to the sender using RTM API
+
+            (This function doesn't supports formatted message
+            when using a bot integration)
+        """
         text = self._gen_reply(text)
         self.send(text)
 
     def send(self, text):
+        """
+            Send a reply using RTM API
+
+            (This function doesn't supports formatted message
+            when using a bot integration)
+        """
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
