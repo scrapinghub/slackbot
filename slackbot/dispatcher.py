@@ -135,7 +135,8 @@ class Message(object):
 
             (This function supports formatted message
             when using a bot integration)
-        """        text = self._gen_reply(text)
+        """
+        text = self._gen_reply(text)
         self.send_webapi(text)
 
     def send_webapi(self, text):
