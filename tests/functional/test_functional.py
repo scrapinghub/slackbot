@@ -110,7 +110,7 @@ def test_bot_ignores_non_related_message_response_tochannel(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.ensure_only_specificmessage_from_bot('hello channel!', tosender=False)
 
-def test_bot_reply_to_channel_message_multiple_decorators(driver):
+def test_bot_reply_to_message_multiple_decorators(driver):
     driver.send_channel_message('hello_decorators')
     driver.wait_for_bot_channel_message('hello!', tosender=False)
     driver.send_channel_message('hello_decorators', tobot=False)
