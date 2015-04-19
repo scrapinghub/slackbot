@@ -139,7 +139,7 @@ class Message(object):
         text = self._gen_reply(text)
         self.send_webapi(text)
 
-    def send_webapi(self, text):
+    def send_webapi(self, text, attachments=None):
         """
             Send a reply using Web API
 
@@ -147,7 +147,9 @@ class Message(object):
             when using a bot integration)
         """
         self._client.send_message(
-            self._body['channel'], to_utf8(text))
+            self._body['channel'],
+            to_utf8(text),
+            attachments=attachments)
 
     def reply(self, text):
         """

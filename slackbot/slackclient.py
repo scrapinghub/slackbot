@@ -94,8 +94,13 @@ class SlackClient(object):
                 data.append(json.loads(d))
         return data
 
-    def rtm_send_message(self, channel, message):
-        message_json = {'type': 'message', 'channel': channel, 'text': message}
+    def rtm_send_message(self, channel, message, attachments=None):
+        message_json = {
+            'type': 'message',
+            'channel': channel,
+            'text': message,
+            'attachments': attachments
+            }
         self.send_to_websocket(message_json)
 
     def upload_file(self, channel, fname, fpath, comment):
@@ -105,8 +110,8 @@ class SlackClient(object):
                                  filename=fname,
                                  initial_comment=comment)
 
-    def send_message(self, channel, message):
-        self.webapi.chat.post_message(channel, message, username = self.login_data['self']['name'], icon_url = self.bot_icon, icon_emoji = self.bot_emoji)
+    def send_message(self, channel, message, attachments=None):
+        self.webapi.chat.post_message(channel, message, username = self.login_data['self']['name'], icon_url = self.bot_icon, icon_emoji = self.bot_emoji, attachments = attachments)
 
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
