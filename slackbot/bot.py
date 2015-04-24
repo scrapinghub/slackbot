@@ -6,16 +6,16 @@ import importlib
 import logging
 import os
 import re
-import sys
 import thread
 import time
 
 from slackbot import settings
 from slackbot.slackclient import SlackClient
-from slackbot.utils import to_utf8, to_unicode, WorkerPool
+from slackbot.utils import to_utf8
 from slackbot.dispatcher import MessageDispatcher
 
 logger = logging.getLogger(__name__)
+
 
 class Bot(object):
     def __init__(self):
@@ -40,6 +40,7 @@ class Bot(object):
         while True:
             time.sleep(30 * 60)
             self._client.ping()
+
 
 class PluginsManager(object):
     commands = {
@@ -74,15 +75,16 @@ class PluginsManager(object):
                 logger.exception('Failed to import %s', module)
 
     def get_plugins(self, category, text):
-        hasMatch = False
+        has_matching_plugin = False
         for matcher in self.commands[category]:
             m = matcher.search(text)
             if m:
-                hasMatch = True
+                has_matching_plugin = True
                 yield self.commands[category][matcher], to_utf8(m.groups())
 
-        if not hasMatch:
+        if not has_matching_plugin:
             yield None, None
+
 
 def respond_to(matchstr, flags=0):
     def wrapper(func):
@@ -90,6 +92,7 @@ def respond_to(matchstr, flags=0):
         logger.info('registered respond_to plugin "%s" to "%s"', func.__name__, matchstr)
         return func
     return wrapper
+
 
 def listen_to(matchstr, flags=0):
     def wrapper(func):

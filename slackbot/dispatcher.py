@@ -1,10 +1,7 @@
 # -*- coding: utf8 -*-
 
-from glob import glob
 import logging
-import os
 import re
-import sys
 import time
 import traceback
 
@@ -13,6 +10,7 @@ from slackbot.utils import to_utf8, WorkerPool
 logger = logging.getLogger(__name__)
 
 AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
+
 
 class MessageDispatcher(object):
     def __init__(self, slackclient, plugins):
@@ -42,7 +40,6 @@ class MessageDispatcher(object):
         if responded is False and category == 'respond_to':
             self._default_reply(msg)
 
-
     def _on_new_message(self, msg):
         # ignore edits
         subtype = msg.get('subtype', '')
@@ -62,12 +59,11 @@ class MessageDispatcher(object):
         if username == botname or username == 'slackbot':
             return
 
-        msgRespondTo = self.filter_text(msg)
-        if msgRespondTo:
-            self._pool.add_task(('respond_to', msgRespondTo))
+        msg_respond_to = self.filter_text(msg)
+        if msg_respond_to:
+            self._pool.add_task(('respond_to', msg_respond_to))
         else:
             self._pool.add_task(('listen_to', msg))
-
 
     def filter_text(self, msg):
         text = msg.get('text', '')
@@ -106,6 +102,7 @@ class MessageDispatcher(object):
 
         self._client.rtm_send_message(msg['channel'],
                                      '\n'.join(to_utf8(default_reply)))
+
 
 class Message(object):
     def __init__(self, slackclient, body):
