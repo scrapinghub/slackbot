@@ -95,6 +95,15 @@ class Driver(object):
                         raise AssertionError(
                             'expected to get message matching "%s", but got message "%s"' % (match, event['text']))
 
+    def ensure_no_channel_reply_from_bot(self, wait=5):
+        for _ in xrange(wait):
+            time.sleep(1)
+            with self._events_lock:
+                for event in self.events:
+                    if self._is_bot_message(event):
+                        raise AssertionError(
+                            'expected to get nothing, but got message "%s"' % event['text'])
+
     def wait_for_file_uploaded(self, name, maxwait=60):
         for _ in xrange(maxwait):
             time.sleep(1)

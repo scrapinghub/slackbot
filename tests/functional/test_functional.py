@@ -110,6 +110,14 @@ def test_bot_ignores_non_related_message_response_tochannel(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.ensure_only_specificmessage_from_bot('hello channel!', tosender=False)
 
+def test_bot_ignores_unknown_message_noresponse_tochannel(driver):
+    driver.send_channel_message('unknown message', tobot=False)
+    driver.ensure_no_channel_reply_from_bot()
+
+def test_bot_send_usage_unknown_message_response_tosender(driver):
+    driver.send_channel_message('unknown message', tobot=True)
+    driver.ensure_only_specificmessage_from_bot('Bad command "unknown message".+', tosender=False)
+
 def test_bot_reply_to_message_multiple_decorators(driver):
     driver.send_channel_message('hello_decorators')
     driver.wait_for_bot_channel_message('hello!', tosender=False)
