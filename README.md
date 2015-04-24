@@ -52,14 +52,26 @@ Now you can talk to your bot in your slack client!
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
 
-To write a new plugin, simplely create a function decorated by `slackbot.bot.respond_to`:
+To write a new plugin, simplely create a function decorated by `slackbot.bot.respond_to` or `slackbot.bot.listen_to`:
+
+- A function decorated with `respond_to` is called when a message matching the pattern is sent to the bot (direct message or @botname in a channel/group chat)
+- A function decorated with `listen_to` is called when a message matching the pattern is sent on a channel/group chat (not directly sent to the bot)
 
 ```python
 from slackbot.bot import respond_to
+from slackbot.bot import listen_to
 
 @respond_to('I love you')
 def love(message):
     message.reply('I love you too!')
+
+@listen_to('Can someone help me?')
+def help(message):
+    # Message is replied to the sender (prefixed with @user)
+    message.reply('Yes, I can!')
+
+    # Message is sent on the channel
+    # message.send('I can help everybody!')
 ```
 
 To extract params from the message, you can use regular expression:
