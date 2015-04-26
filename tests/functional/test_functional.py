@@ -56,11 +56,19 @@ def test_bot_get_online(driver): # pylint: disable=W0613
 
 def test_bot_respond_to_simple_message(driver):
     driver.send_direct_message('hello')
-    driver.wait_for_bot_direct_message('hello!')
+    driver.wait_for_bot_direct_message('hello sender!')
+
+def test_bot_respond_to_simple_message_with_formatting(driver):
+    driver.send_direct_message('hello_formatting')
+    driver.wait_for_bot_direct_message('_hello_ sender!')
 
 def test_bot_respond_to_simple_message_case_insensitive(driver):
     driver.send_direct_message('hEllO')
-    driver.wait_for_bot_direct_message('hello!')
+    driver.wait_for_bot_direct_message('hello sender!')
+
+def test_bot_respond_to_simple_message_multiple_plugins(driver):
+    driver.send_direct_message('hello_formatting hello')
+    driver.wait_for_bot_direct_messages({'hello sender!', '_hello_ sender!'})
 
 def test_bot_default_reply(driver):
     driver.send_direct_message('youdontunderstandthiscommand do you')
@@ -80,19 +88,43 @@ def test_bot_upload_file_from_link(driver):
 
 def test_bot_reply_to_channel_message(driver):
     driver.send_channel_message('hello')
-    driver.wait_for_bot_channel_message('hello!')
+    driver.wait_for_bot_channel_message('hello sender!')
     driver.send_channel_message('hello', colon=False)
-    driver.wait_for_bot_channel_message('hello!')
+    driver.wait_for_bot_channel_message('hello sender!')
+
+def test_bot_listen_to_channel_message(driver):
+    driver.send_channel_message('hello', tobot=False)
+    driver.wait_for_bot_channel_message('hello channel!', tosender=False)
 
 def test_bot_reply_to_group_message(driver):
     driver.send_group_message('hello')
-    driver.wait_for_bot_group_message('hello!')
+    driver.wait_for_bot_group_message('hello sender!')
     driver.send_group_message('hello', colon=False)
-    driver.wait_for_bot_group_message('hello!')
+    driver.wait_for_bot_group_message('hello sender!')
 
-def test_bot_ignores_non_related_channel_message(driver):
+def test_bot_ignores_non_related_message_response_tosender(driver):
+    driver.send_channel_message('hello', tobot=True)
+    driver.ensure_only_specificmessage_from_bot('hello sender!', tosender=True)
+
+def test_bot_ignores_non_related_message_response_tochannel(driver):
     driver.send_channel_message('hello', tobot=False)
+    driver.ensure_only_specificmessage_from_bot('hello channel!', tosender=False)
+
+def test_bot_ignores_unknown_message_noresponse_tochannel(driver):
+    driver.send_channel_message('unknown message', tobot=False)
     driver.ensure_no_channel_reply_from_bot()
+
+def test_bot_send_usage_unknown_message_response_tosender(driver):
+    driver.send_channel_message('unknown message', tobot=True)
+    driver.ensure_only_specificmessage_from_bot('Bad command "unknown message".+', tosender=False)
+
+def test_bot_reply_to_message_multiple_decorators(driver):
+    driver.send_channel_message('hello_decorators')
+    driver.wait_for_bot_channel_message('hello!', tosender=False)
+    driver.send_channel_message('hello_decorators', tobot=False)
+    driver.wait_for_bot_channel_message('hello!', tosender=False)
+    driver.send_direct_message('hello_decorators')
+    driver.wait_for_bot_direct_message('hello!')
 
 @pytest.mark.skipif(not TRAVIS, reason="only run reconnect tests on travis builds") # pylint: disable=E1101
 def test_bot_reconnect(driver):

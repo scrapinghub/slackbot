@@ -15,9 +15,12 @@ from slackbot.utils import to_utf8
 
 logger = logging.getLogger(__name__)
 
+
 class SlackClient(object):
-    def __init__(self, token, connect=True):
+    def __init__(self, token, bot_icon=None, bot_emoji=None, connect=True):
         self.token = token
+        self.bot_icon = bot_icon
+        self.bot_emoji = bot_emoji
         self.username = None
         self.domain = None
         self.login_data = None
@@ -92,8 +95,13 @@ class SlackClient(object):
                 data.append(json.loads(d))
         return data
 
-    def rtm_send_message(self, channel, message):
-        message_json = {'type': 'message', 'channel': channel, 'text': message}
+    def rtm_send_message(self, channel, message, attachments=None):
+        message_json = {
+            'type': 'message',
+            'channel': channel,
+            'text': message,
+            'attachments': attachments
+            }
         self.send_to_websocket(message_json)
 
     def upload_file(self, channel, fname, fpath, comment):
@@ -103,9 +111,14 @@ class SlackClient(object):
                                  filename=fname,
                                  initial_comment=comment)
 
-    def send_channel_message(self, channel, message):
-        message_json = {'type': 'message', 'channel': channel, 'text': message}
-        self.send_to_websocket(message_json)
+    def send_message(self, channel, message, attachments=None):
+        self.webapi.chat.post_message(
+                channel,
+                message,
+                username=self.login_data['self']['name'],
+                icon_url=self.bot_icon,
+                icon_emoji=self.bot_emoji,
+                attachments=attachments)
 
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
@@ -115,8 +128,10 @@ class SlackClient(object):
             if user['name'] == username:
                 return userid
 
+
 class SlackConnectionError(Exception):
     pass
+
 
 class Channel(object):
     def __init__(self, slackclient, body):

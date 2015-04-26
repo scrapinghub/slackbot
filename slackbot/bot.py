@@ -6,20 +6,24 @@ import importlib
 import logging
 import os
 import re
-import sys
 import thread
 import time
 
 from slackbot import settings
 from slackbot.slackclient import SlackClient
-from slackbot.utils import to_utf8, to_unicode, WorkerPool
+from slackbot.utils import to_utf8
 from slackbot.dispatcher import MessageDispatcher
 
 logger = logging.getLogger(__name__)
 
+
 class Bot(object):
     def __init__(self):
-        self._client = SlackClient(settings.API_TOKEN)
+        self._client = SlackClient(
+            settings.API_TOKEN,
+            bot_icon = settings.BOT_ICON if hasattr(settings, 'BOT_ICON') else None,
+            bot_emoji = settings.BOT_EMOJI if hasattr(settings, 'BOT_EMOJI') else None
+        )
         self._plugins = PluginsManager()
         self._dispatcher = MessageDispatcher(self._client, self._plugins)
 
@@ -37,8 +41,12 @@ class Bot(object):
             time.sleep(30 * 60)
             self._client.ping()
 
+
 class PluginsManager(object):
-    commands = {}
+    commands = {
+        'respond_to': {},
+        'listen_to': {}
+    }
 
     def __init__(self):
         pass
@@ -66,16 +74,29 @@ class PluginsManager(object):
             except:
                 logger.exception('Failed to import %s', module)
 
-    def get_plugin(self, text):
-        for matcher in self.commands:
-            m = matcher.match(text)
+    def get_plugins(self, category, text):
+        has_matching_plugin = False
+        for matcher in self.commands[category]:
+            m = matcher.search(text)
             if m:
-                return self.commands[matcher], to_utf8(m.groups())
-        return None, None
+                has_matching_plugin = True
+                yield self.commands[category][matcher], to_utf8(m.groups())
+
+        if not has_matching_plugin:
+            yield None, None
+
 
 def respond_to(matchstr, flags=0):
     def wrapper(func):
-        PluginsManager.commands[re.compile(matchstr, flags)] = func
-        logger.info('registered plugin "%s" to "%s"', func.__name__, matchstr)
+        PluginsManager.commands['respond_to'][re.compile(matchstr, flags)] = func
+        logger.info('registered respond_to plugin "%s" to "%s"', func.__name__, matchstr)
+        return func
+    return wrapper
+
+
+def listen_to(matchstr, flags=0):
+    def wrapper(func):
+        PluginsManager.commands['listen_to'][re.compile(matchstr, flags)] = func
+        logger.info('registered listen_to plugin "%s" to "%s"', func.__name__, matchstr)
         return func
     return wrapper
