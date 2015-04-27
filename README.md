@@ -40,7 +40,7 @@ Alternatively, you can use the environment variable `SLACK_API_TOKEN`.
 ### Run the bot
 
 ```python
-from slackbot import Bot
+from slackbot.bot import Bot
 def main():
     bot = Bot()
     bot.run()
