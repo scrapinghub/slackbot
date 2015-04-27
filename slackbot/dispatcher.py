@@ -82,7 +82,7 @@ class MessageDispatcher(object):
         else:
             m = AT_MESSAGE_MATCHER.match(text)
             if m:
-                msg['text'] = m.groups(2)
+                msg['text'] = m.groups(2)[1]
         return msg
 
     def loop(self):
