@@ -70,6 +70,12 @@ def test_bot_respond_to_simple_message_multiple_plugins(driver):
     driver.send_direct_message('hello_formatting hello')
     driver.wait_for_bot_direct_messages({'hello sender!', '_hello_ sender!'})
 
+def test_bot_direct_message_with_at_prefix(driver):
+    driver.send_direct_message('hello', tobot=True)
+    driver.wait_for_bot_direct_message('hello sender!')
+    driver.send_direct_message('hello', tobot=True, colon=False)
+    driver.wait_for_bot_direct_message('hello sender!')
+
 def test_bot_default_reply(driver):
     driver.send_direct_message('youdontunderstandthiscommand do you')
     driver.wait_for_bot_direct_message('.*You can ask me.*')

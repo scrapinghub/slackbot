@@ -53,13 +53,18 @@ class Driver(object):
         else:
             raise AssertionError('test bot is still %s' % ('offline' if online else 'online'))
 
-    def send_direct_message(self, msg):
-        self._send_message_to_bot(self.dm_chan, msg)
-
-    def _send_channel_message(self, chan, msg, tobot=True, colon=True):
+    def _format_message(self, msg, tobot=True, colon=True):
         colon = ':' if colon else ''
         if tobot:
             msg = '<@%s>%s %s' % (self.testbot_userid, colon, msg)
+        return msg
+
+    def send_direct_message(self, msg, tobot=True, colon=True):
+        msg = self._format_message(msg, tobot, colon)
+        self._send_message_to_bot(self.dm_chan, msg)
+
+    def _send_channel_message(self, chan, msg, tobot=True, colon=True):
+        msg = self._format_message(msg, tobot, colon)
         self._send_message_to_bot(chan, msg)
 
     def send_channel_message(self, msg, tobot=True, colon=True):

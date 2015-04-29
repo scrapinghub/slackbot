@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 import logging
 import re
@@ -82,7 +82,7 @@ class MessageDispatcher(object):
         else:
             m = AT_MESSAGE_MATCHER.match(text)
             if m:
-                msg['text'] = m.groups(2)[1]
+                msg['text'] = m.group(2)
         return msg
 
     def loop(self):
