@@ -28,16 +28,16 @@ class MessageDispatcher(object):
         responded = False
         for func, args in self._plugins.get_plugins(category, text):
             if func:
+                responded = True
                 try:
                     func(Message(self._client, msg), *args)
-                    responded = True
                 except:
                     logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
                     reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
                     reply += '```\n%s\n```' % traceback.format_exc()
                     self._client.rtm_send_message(msg['channel'], reply)
 
-        if responded is False and category == 'respond_to':
+        if not responded and category == 'respond_to':
             self._default_reply(msg)
 
     def _on_new_message(self, msg):
