@@ -27,9 +27,9 @@ First you need to get the slack api token for your bot. You have two options:
 
 ### Configure the api token
 
-Then you need to configure the `API_TOKEN` in a python module `local_settings.py`, which must be located in a python import path.
+Then you need to configure the `API_TOKEN` in a python module `slackbot_settings.py`, which must be located in a python import path.
 
-local_settings.py:
+slackbot_settings.py:
 
 ```python
 API_TOKEN = "<your-api-token>"
@@ -83,7 +83,7 @@ def giveme(message, something):
     message.reply('Here is %s' % something)
 ```
 
-And add the plugins module to `PLUGINS` list of slackbot settings, e.g. local_settings.py:
+And add the plugins module to `PLUGINS` list of slackbot settings, e.g. slackbot_settings.py:
 
 ```python
 PLUGINS = [
