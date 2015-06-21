@@ -98,7 +98,7 @@ class MessageDispatcher(object):
         default_reply = [
             u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
-        default_reply += [u'    • `%s`' % str(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
+        default_reply += [u'    • `%s`' % unicode(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
 
         self._client.rtm_send_message(msg['channel'],
                                      '\n'.join(to_utf8(default_reply)))
