@@ -98,7 +98,7 @@ class MessageDispatcher(object):
         default_reply = [
             u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
-        default_reply += [u'    • `%s`' % unicode(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
+        default_reply += [u'    • `{}`'.format(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
 
         self._client.rtm_send_message(msg['channel'],
                                      '\n'.join(to_utf8(default_reply)))
@@ -116,7 +116,7 @@ class Message(object):
         return self._client.find_user_by_name(self._body['username'])
 
     def _gen_at_message(self, text):
-        text = '<@{}>: {}'.format(self._get_user_id(), text)
+        text = u'<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
     def _gen_reply(self, text):
