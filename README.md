@@ -70,9 +70,8 @@ def github():
         'color': '#59afe1'
     }]
     message.send_webapi('', json.dumps(attachments))
-    ```
-
-
+```
+    
 ## Plugins
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
