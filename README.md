@@ -35,7 +35,7 @@ slackbot_settings.py:
 API_TOKEN = "<your-api-token>"
 ```
 
-Alternatively, you can use the environment variable `SLACK_API_TOKEN`.
+Alternatively, you can use the environment variable `SLACKBOT_API_TOKEN`.
 
 ### Run the bot
 
@@ -63,6 +63,11 @@ To write a new plugin, simplely create a function decorated by `slackbot.bot.res
 ```python
 from slackbot.bot import respond_to
 from slackbot.bot import listen_to
+import re 
+
+@respond_to('hi', re.IGNORECASE)
+def hi(message):
+    message.reply('I can understand hi or HI!')
 
 @respond_to('I love you')
 def love(message):
