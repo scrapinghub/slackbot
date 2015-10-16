@@ -50,7 +50,7 @@ class MessageDispatcher(object):
         try:
             msguser = self._client.users.get(msg['user'])
             username = msguser['name']
-        except KeyError:
+        except (KeyError, TypeError):
             if 'username' in msg:
                 username = msg['username']
             else:
