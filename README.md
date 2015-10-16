@@ -72,20 +72,6 @@ def github():
     message.send_webapi('', json.dumps(attachments))
 ```
 
-### Command Parameter Support
-
-If you would like to have a command like 'stats' and 'stats start_date end_date', you can create reg ex like so:
-
-```python
-from slackbot.bot import respond_to
-import re
-
-
-@respond_to('stat$', re.IGNORECASE)
-@respond_to('stat (.*) (.*)', re.IGNORECASE)
-def stats(message, start_date=None, end_date=None):
-```
-    
 ## Plugins
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
@@ -125,6 +111,19 @@ from slackbot.bot import respond_to
 def giveme(message, something):
     message.reply('Here is %s' % something)
 ```
+
+If you would like to have a command like 'stats' and 'stats start_date end_date', you can create reg ex like so:
+
+```python
+from slackbot.bot import respond_to
+import re
+
+
+@respond_to('stat$', re.IGNORECASE)
+@respond_to('stat (.*) (.*)', re.IGNORECASE)
+def stats(message, start_date=None, end_date=None):
+```
+
 
 And add the plugins module to `PLUGINS` list of slackbot settings, e.g. slackbot_settings.py:
 
