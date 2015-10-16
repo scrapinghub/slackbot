@@ -1,7 +1,14 @@
+sudo: false
 language: python
 python: 2.7
+addons:
+  apt:
+    packages:
+      - tsocks
 before_install:
-  - sudo cp scripts/slackbot-test-ctl /usr/local/bin
+  - export PATH=$HOME/bin:$PATH
+  - cp scripts/slackbot-test-ctl $HOME/bin
+  - pip install shadowsocks
   - slackbot-test-ctl init
   - slackbot-test-ctl startproxy
 install: pip install -r requirements.txt
