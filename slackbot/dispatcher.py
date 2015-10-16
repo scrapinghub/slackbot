@@ -50,7 +50,7 @@ class MessageDispatcher(object):
         try:
             msguser = self._client.users.get(msg['user'])
             username = msguser['name']
-        except KeyError:
+        except (KeyError, TypeError):
             if 'username' in msg:
                 username = msg['username']
             else:
@@ -98,8 +98,9 @@ class MessageDispatcher(object):
         default_reply = [
             u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
-        default_reply += [u'    • `{}`'.format(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
-
+        default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "") \
+            for p, v in self._plugins.commands['respond_to'].iteritems()]
+            
         self._client.rtm_send_message(msg['channel'],
                                      '\n'.join(to_utf8(default_reply)))
 
