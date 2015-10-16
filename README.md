@@ -71,7 +71,22 @@ def github():
     }]
     message.send_webapi('', json.dumps(attachments))
 ```
-    
+
+### Handle Error
+If you want to replace the bot default error handler, you can create your own custom error message like this:
+
+```python
+from slackbot.bot import respond_to
+import re
+
+
+@respond_to('help', re.IGNORECASE)
+@respond_to('(.*)', re.IGNORECASE)
+def help(message, incoming_chat_message=None):
+    message.reply("Sorry I don't understand {}".format(incoming_chat_message))
+```
+
+
 ## Plugins
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
