@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 from glob import glob
 import imp
@@ -6,8 +6,9 @@ import importlib
 import logging
 import os
 import re
-import thread
 import time
+
+from six.moves import _thread
 
 from slackbot import settings
 from slackbot.slackclient import SlackClient
@@ -31,7 +32,7 @@ class Bot(object):
         self._plugins.init_plugins()
         self._dispatcher.start()
         self._client.rtm_connect()
-        thread.start_new_thread(self._keepactive, tuple())
+        _thread.start_new_thread(self._keepactive, tuple())
         logger.info('connected to slack RTM api')
         self._dispatcher.loop()
 

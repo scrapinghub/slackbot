@@ -78,7 +78,7 @@ class SlackClient(object):
         while True:
             try:
                 data += '{0}\n'.format(self.websocket.recv())
-            except WebSocketException, e:
+            except WebSocketException as e:
                 if isinstance(e, WebSocketConnectionClosedException):
                     logger.warning('lost websocket connection, try to reconnect now')
                 else:
