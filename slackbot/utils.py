@@ -5,7 +5,6 @@ import logging
 import tempfile
 import requests
 from contextlib import contextmanager
-
 from six.moves import _thread, range, queue
 import six
 
