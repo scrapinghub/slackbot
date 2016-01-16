@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 import logging
 import re
 import time
 import traceback
-
+from six import iteritems
 from slackbot.utils import to_utf8, WorkerPool
 
 logger = logging.getLogger(__name__)
@@ -98,11 +99,11 @@ class MessageDispatcher(object):
         default_reply = [
             u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
         ]
-        default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "") \
-            for p, v in self._plugins.commands['respond_to'].iteritems()]
+        default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
+                          for p, v in iteritems(self._plugins.commands['respond_to'])]
             
         self._client.rtm_send_message(msg['channel'],
-                                     '\n'.join(to_utf8(default_reply)))
+                                      '\n'.join(to_utf8(default_reply)))
 
 
 class Message(object):
