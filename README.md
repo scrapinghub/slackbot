@@ -8,6 +8,7 @@ A chat bot for [Slack](https://slack.com) inspired by [llimllib/limbo](https://g
 * Simple plugins mechanism
 * Messages can be handled concurrently
 * Automatically reconnect to slack when connection is lost
+* Supports Python3
 
 ## Installation
 

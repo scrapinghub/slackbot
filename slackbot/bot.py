@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from glob import glob
+import imp
+import importlib
 import logging
 import os
 import re
 import time
-
+from glob import glob
 from six.moves import _thread
 
 from slackbot import settings
