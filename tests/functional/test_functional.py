@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""This function tests would start a slackbot, and use slack web api to drive
+"""These function tests would start a slackbot, and use slack web api to drive
 the tests agains the bot.
 """
 
