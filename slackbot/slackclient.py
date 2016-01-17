@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+#coding: UTF-8
 
 from __future__ import print_function, absolute_import
 import os
@@ -6,6 +6,7 @@ import json
 import logging
 import time
 import slacker
+from six import iteritems
 
 from websocket import (
     create_connection, WebSocketException, WebSocketConnectionClosedException
@@ -124,7 +125,7 @@ class SlackClient(object):
         return Channel(self, self.channels[channel_id])
 
     def find_user_by_name(self, username):
-        for userid, user in self.users.iteritems():
+        for userid, user in iteritems(self.users):
             if user['name'] == username:
                 return userid
 

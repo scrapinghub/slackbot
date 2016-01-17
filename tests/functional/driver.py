@@ -1,10 +1,10 @@
-import thread
 import threading
 import json
 import re
 import time
 import slacker
 import websocket
+from six.moves import _thread, range
 
 
 class Driver(object):
@@ -44,7 +44,7 @@ class Driver(object):
         self._wait_for_bot_presense(False)
 
     def _wait_for_bot_presense(self, online):
-        for _ in xrange(10):
+        for _ in range(10):
             time.sleep(2)
             if online and self._is_testbot_online():
                 break
@@ -92,7 +92,7 @@ class Driver(object):
         else:
             match = r'^%s$' % match
 
-        for _ in xrange(wait):
+        for _ in range(wait):
             time.sleep(1)
             with self._events_lock:
                 for event in self.events:
@@ -101,7 +101,7 @@ class Driver(object):
                             'expected to get message matching "%s", but got message "%s"' % (match, event['text']))
 
     def ensure_no_channel_reply_from_bot(self, wait=5):
-        for _ in xrange(wait):
+        for _ in range(wait):
             time.sleep(1)
             with self._events_lock:
                 for event in self.events:
@@ -110,7 +110,7 @@ class Driver(object):
                             'expected to get nothing, but got message "%s"' % event['text'])
 
     def wait_for_file_uploaded(self, name, maxwait=60):
-        for _ in xrange(maxwait):
+        for _ in range(maxwait):
             time.sleep(1)
             if self._has_uploaded_file_rtm(name):
                 break
@@ -122,7 +122,7 @@ class Driver(object):
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
 
     def _wait_for_bot_message(self, channel, match, maxwait=60, tosender=True):
-        for _ in xrange(maxwait):
+        for _ in range(maxwait):
             time.sleep(1)
             if self._has_got_message_rtm(channel, match, tosender):
                 break
@@ -169,7 +169,7 @@ class Driver(object):
 
         self._websocket = websocket.create_connection(r['url'])
         self._websocket.sock.setblocking(0)
-        thread.start_new_thread(self._rtm_read_forever, tuple())
+        _thread.start_new_thread(self._rtm_read_forever, tuple())
 
     def _websocket_safe_read(self):
         """Returns data if available, otherwise ''. Newlines indicate multiple messages """
