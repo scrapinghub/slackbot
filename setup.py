@@ -8,12 +8,12 @@ install_requires = (
     'websocket-client>=0.22.0',
     'slacker>=0.5.5',
     'six>=1.10.0'
-)
+) # yapf: disable
 
 excludes = (
     '*test*',
     '*local_settings*',
-)
+) # yapf: disable
 
 setup(name='slackbot',
       version=__version__,
@@ -28,5 +28,10 @@ setup(name='slackbot',
       classifiers=['Development Status :: 4 - Beta',
                    'License :: OSI Approved :: BSD License',
                    'Operating System :: OS Independent',
-                   'Programming Language :: Python'],
-      )
+                   'Programming Language :: Python'
+                   'Programming Language :: Python :: 2',
+                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3',
+                   'Programming Language :: Python :: 3.3',
+                   'Programming Language :: Python :: 3.4',
+                   'Programming Language :: Python :: 3.5'])
