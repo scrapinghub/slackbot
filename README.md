@@ -91,6 +91,8 @@ import re
 @respond_to('hi', re.IGNORECASE)
 def hi(message):
     message.reply('I can understand hi or HI!')
+    # react with thumb up emoji
+    message.react('+1')
 
 @respond_to('I love you')
 def love(message):
