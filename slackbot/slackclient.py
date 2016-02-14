@@ -129,6 +129,12 @@ class SlackClient(object):
             if user['name'] == username:
                 return userid
 
+    def react_to_message(self, emojiname, channel, timestamp):
+        self.webapi.reactions.add(
+            name=emojiname,
+            channel=channel,
+            timestamp=timestamp)
+
 
 class SlackConnectionError(Exception):
     pass

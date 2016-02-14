@@ -170,6 +170,15 @@ class Message(object):
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
+    def react(self, emojiname):
+        """
+           React to a message using the web api
+        """
+        self._client.react_to_message(
+            emojiname=emojiname,
+            channel=self._body['channel'],
+            timestamp=self._body['ts'])
+
     @property
     def channel(self):
         return self._client.get_channel(self._body['channel'])

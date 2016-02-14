@@ -102,6 +102,10 @@ def test_bot_listen_to_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.wait_for_bot_channel_message('hello channel!', tosender=False)
 
+def test_bot_react_to_channel_message(driver):
+    driver.send_channel_message('hey!', tobot=False)
+    driver.ensure_reaction_posted('eggplant')
+
 def test_bot_reply_to_group_message(driver):
     driver.send_group_message('hello')
     driver.wait_for_bot_group_message('hello sender!')

@@ -117,6 +117,14 @@ class Driver(object):
         else:
             raise AssertionError('expected to get file "%s", but got nothing' % name)
 
+    def ensure_reaction_posted(self, emojiname, maxwait=5):
+        for _ in range(maxwait):
+            time.sleep(1)
+            if self._has_reacted(emojiname):
+                break
+        else:
+            raise AssertionError('expected to get reaction "%s", but got nothing' % emojiname)
+
     def _send_message_to_bot(self, channel, msg):
         self._start_ts = time.time()
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
@@ -212,6 +220,16 @@ class Driver(object):
                 if event['type'] == 'file_shared' \
                    and event['file']['name'] == name \
                    and event['file']['user'] == self.testbot_userid:
+                    return True
+            return False
+
+    def _has_reacted(self, emojiname):
+        with self._events_lock:
+            for event in self.events:
+                if event['type'] == 'reaction_added' \
+                   and event['user'] == self.testbot_userid \
+                   and (event.get('reaction', '') == emojiname \
+                        or event.get('name', '') == emojiname):
                     return True
             return False
 
