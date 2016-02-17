@@ -46,7 +46,7 @@ from slackbot.bot import Bot
 def main():
     bot = Bot()
     bot.run()
-    
+
 if __name__ == "__main__":
     main()
 ```
@@ -86,7 +86,7 @@ To write a new plugin, simplely create a function decorated by `slackbot.bot.res
 ```python
 from slackbot.bot import respond_to
 from slackbot.bot import listen_to
-import re 
+import re
 
 @respond_to('hi', re.IGNORECASE)
 def hi(message):
@@ -137,3 +137,7 @@ PLUGINS = [
     'mybot.plugins',
 ]
 ```
+
+## Discussion
+
+* :hash: #python-slackbot on [freenode](https://webchat.freenode.net/?channels=python-slackbot)
