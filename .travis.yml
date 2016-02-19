@@ -1,7 +1,18 @@
+sudo: false
 language: python
-python: 2.7
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+cache:
+  directories:
+    - $HOME/.cache/pip
 before_install:
-  - sudo cp scripts/slackbot-test-ctl /usr/local/bin
+  - mkdir -p $HOME/opt/local/bin
+  - export PATH=$HOME/opt/local/bin:$PATH
+  - pushd /tmp/ && git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure --prefix=$HOME/opt/local && make -j2 && make install && popd
+  - pip install shadowsocks
+  - cp scripts/slackbot-test-ctl $HOME/opt/local/bin
   - slackbot-test-ctl init
   - slackbot-test-ctl startproxy
 install: pip install -r requirements.txt

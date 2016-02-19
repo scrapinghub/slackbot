@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 import os
@@ -6,6 +6,7 @@ import json
 import logging
 import time
 import slacker
+from six import iteritems
 
 from websocket import (
     create_connection, WebSocketException, WebSocketConnectionClosedException
@@ -78,7 +79,7 @@ class SlackClient(object):
         while True:
             try:
                 data += '{0}\n'.format(self.websocket.recv())
-            except WebSocketException, e:
+            except WebSocketException as e:
                 if isinstance(e, WebSocketConnectionClosedException):
                     logger.warning('lost websocket connection, try to reconnect now')
                 else:
@@ -124,9 +125,15 @@ class SlackClient(object):
         return Channel(self, self.channels[channel_id])
 
     def find_user_by_name(self, username):
-        for userid, user in self.users.iteritems():
+        for userid, user in iteritems(self.users):
             if user['name'] == username:
                 return userid
+
+    def react_to_message(self, emojiname, channel, timestamp):
+        self.webapi.reactions.add(
+            name=emojiname,
+            channel=channel,
+            timestamp=timestamp)
 
 
 class SlackConnectionError(Exception):

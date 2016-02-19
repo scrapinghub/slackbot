@@ -4,7 +4,8 @@ import logging
 import re
 import time
 import traceback
-
+from six import iteritems
+from slackbot.manager import PluginsManager
 from slackbot.utils import to_utf8, WorkerPool
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ class MessageDispatcher(object):
         try:
             msguser = self._client.users.get(msg['user'])
             username = msguser['name']
-        except KeyError:
+        except (KeyError, TypeError):
             if 'username' in msg:
                 username = msg['username']
             else:
@@ -95,19 +96,28 @@ class MessageDispatcher(object):
             time.sleep(1)
 
     def _default_reply(self, msg):
-        default_reply = [
-            u'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
-        ]
-        default_reply += [u'    • `{}`'.format(p.pattern) for p in self._plugins.commands['respond_to'].iterkeys()]
+        try:
+            from slackbot_settings import default_reply
+            default_reply = to_utf8(default_reply)
 
-        self._client.rtm_send_message(msg['channel'],
-                                     '\n'.join(to_utf8(default_reply)))
+        except ImportError:
+
+            default_reply = [
+                'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
+            ]
+            default_reply += ['    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
+                              for p, v in iteritems(self._plugins.commands['respond_to'])]
+
+            default_reply = '\n'.join(to_utf8(default_reply))
+
+        self._client.rtm_send_message(msg['channel'], default_reply)
 
 
 class Message(object):
     def __init__(self, slackclient, body):
         self._client = slackclient
         self._body = body
+        self._plugins = PluginsManager()
 
     def _get_user_id(self):
         if 'user' in self._body:
@@ -116,7 +126,7 @@ class Message(object):
         return self._client.find_user_by_name(self._body['username'])
 
     def _gen_at_message(self, text):
-        text = u'<@{}>: {}'.format(self._get_user_id(), text)
+        text = '<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
     def _gen_reply(self, text):
@@ -168,6 +178,15 @@ class Message(object):
         self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
+    def react(self, emojiname):
+        """
+           React to a message using the web api
+        """
+        self._client.react_to_message(
+            emojiname=emojiname,
+            channel=self._body['channel'],
+            timestamp=self._body['ts'])
+
     @property
     def channel(self):
         return self._client.get_channel(self._body['channel'])
@@ -175,3 +194,7 @@ class Message(object):
     @property
     def body(self):
         return self._body
+
+    def docs_reply(self):
+        reply = ['    • `{0}` {1}'.format(v.__name__, v.__doc__ or "") for p, v in iteritems(self._plugins.commands['respond_to'])]
+        return '\n'.join(to_utf8(reply))

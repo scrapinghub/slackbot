@@ -1,4 +1,4 @@
 requests>=2.4.0
 websocket-client>=0.22.0
-importlib>=1.0.3
 slacker>=0.5.5
+six>=1.10.0

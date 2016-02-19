@@ -1,12 +1,12 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 import os
 import logging
 import tempfile
-import thread
-import Queue
 import requests
 from contextlib import contextmanager
+from six.moves import _thread, range, queue
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +34,15 @@ def to_utf8(s):
     >>> to_utf8([u'a', u'b', u'\u4f60'])
     ['a', 'b', '\\xe4\\xbd\\xa0']
     """
-    if isinstance(s, str):
-        return s
-    elif isinstance(s, unicode):
-        return s.encode('utf-8')
-    elif isinstance(s, (list, tuple, set)):
-        return [to_utf8(v) for v in s]
+    if six.PY2:
+        if isinstance(s, str):
+            return s
+        elif isinstance(s, unicode):
+            return s.encode('utf-8')
+        elif isinstance(s, (list, tuple, set)):
+            return [to_utf8(v) for v in s]
+        else:
+            return s
     else:
         return s
 
@@ -60,11 +63,11 @@ class WorkerPool(object):
     def __init__(self, func, nworker=10):
         self.nworker = nworker
         self.func = func
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
 
     def start(self):
-        for _ in xrange(self.nworker):
-            thread.start_new_thread(self.do_work, tuple())
+        for __ in range(self.nworker):
+            _thread.start_new_thread(self.do_work, tuple())
 
     def add_task(self, msg):
         self.queue.put(msg)

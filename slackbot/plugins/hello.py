@@ -23,3 +23,7 @@ def hello_send(message):
 @respond_to('hello_decorators')
 def hello_decorators(message):
     message.send('hello!')
+
+@listen_to('hey!')
+def hey(message):
+    message.react('eggplant')
