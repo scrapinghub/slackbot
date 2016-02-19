@@ -6,6 +6,7 @@ import logging.config
 from slackbot import settings
 from slackbot.bot import Bot
 
+
 def main():
     kw = {
         'format': '[%(asctime)s] %(message)s',
