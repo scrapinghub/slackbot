@@ -46,6 +46,8 @@ def to_utf8(s):
     else:
         return s
 
+def convert_time(s):
+    return datetime.strptime(s, '%I:%M %p').strftime('%H:%M')
 
 @contextmanager
 def create_tmp_file(content=''):

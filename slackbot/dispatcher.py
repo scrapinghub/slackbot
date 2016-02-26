@@ -14,33 +14,65 @@ logger = logging.getLogger(__name__)
 AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
 
 
-class MessageDispatcher(object):
+class Dispatcher(object):
     def __init__(self, slackclient, plugins):
         self._client = slackclient
-        self._pool = WorkerPool(self.dispatch_msg)
+        self._pool = WorkerPool(self.dispatch)
         self._plugins = plugins
 
     def start(self):
         self._pool.start()
 
-    def dispatch_msg(self, msg):
-        category = msg[0]
-        msg = msg[1]
-        text = msg['text']
-        responded = False
-        for func, args in self._plugins.get_plugins(category, text):
+    def _execute_plugin(self, category, key, params):
+        executed = False
+        exception = None
+        for func, args in self._plugins.get_plugins(category, key):
             if func:
-                responded = True
+                executed = True
                 try:
-                    func(Message(self._client, msg), *args)
+                    func(params, *args)
                 except:
-                    logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
-                    reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
-                    reply += '```\n%s\n```' % traceback.format_exc()
-                    self._client.rtm_send_message(msg['channel'], reply)
+                    logger.exception('Failed to handle message %s with plugin'
+                                     ' "%s"', key, func.__name__)
+                    exception = ('[%s] I have problem when handling "%s"\n' %
+                                 (func.__name__, key))
+                    exception += '```\n%s\n```' % traceback.format_exc()
+        return executed, exception
 
-        if not responded and category == 'respond_to':
-            self._default_reply(msg)
+    def dispatch(self, event):
+        """
+        Should dispatch all categories.
+        """
+        category, payload = event
+
+        logger.debug('dispatching category: %s, payload: %s' %
+                     (category, str(payload)))
+
+        if category in ['listen_to', 'respond_to']:
+            text = payload['text']
+            message = Message(self._client, payload)
+            responded, exception = self._execute_plugin(category, text, message)
+            if exception is not None:
+                self._client.rtm_send_message(payload['channel'], exception)
+            if not responded and category == 'responded_to':
+                self._default_reply(payload)
+        elif category == 'on_reaction':
+            reaction = payload['reaction']
+            user = payload['user']
+            reaction_event = payload['type'] # added/removed
+            item = payload['item']
+            timestamp = item['ts']
+            channel = item['channel']
+            item_type = item['type']
+
+            # Note that we can only find messages in public channels.
+            message = self._client.get_message(channel=channel, timestamp=timestamp)
+            params = { 'user' : user, 'type': reaction_event, 'message' : message }
+            executed, exception = self._execute_plugin(category, reaction, params)
+
+            assert executed, "Couldn't find any plugin for %s." % category
+            assert exception is None, exception
+
 
     def _on_new_message(self, msg):
         # ignore edits
@@ -67,6 +99,10 @@ class MessageDispatcher(object):
         else:
             self._pool.add_task(('listen_to', msg))
 
+    def _on_reaction(self, event):
+      botname = self._client.login_data['self']['name']
+      self._pool.add_task(('on_reaction', event))
+
     def filter_text(self, msg):
         text = msg.get('text', '')
         channel = msg['channel']
@@ -91,7 +127,12 @@ class MessageDispatcher(object):
         while True:
             events = self._client.rtm_read()
             for event in events:
-                if event.get('type') != 'message':
+                if event.get('type') in ['reaction_added', 'reaction_removed']:
+                    # only capture reaction events on messages.
+                    if event.get('item').get('type') == 'message':
+                        self._on_reaction(event)
+                    continue
+                elif event.get('type') != 'message':
                     continue
                 self._on_new_message(event)
             time.sleep(1)
@@ -158,6 +199,7 @@ class Message(object):
             self._body['channel'],
             to_utf8(text),
             attachments=attachments)
+        return Message(self._client, response.body['message'])
 
     def reply(self, text):
         """
@@ -176,7 +218,7 @@ class Message(object):
             (This function doesn't supports formatted message
             when using a bot integration)
         """
-        self._client.rtm_send_message(
+        return self._client.rtm_send_message(
             self._body['channel'], to_utf8(text))
 
     def react(self, emojiname):
@@ -187,6 +229,10 @@ class Message(object):
             emojiname=emojiname,
             channel=self._body['channel'],
             timestamp=self._body['ts'])
+
+    def reply_channel(self, text):
+        text = u'<!channel>: {}'.format(text)
+        return self.send_webapi(text)
 
     @property
     def channel(self):

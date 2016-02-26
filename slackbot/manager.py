@@ -17,7 +17,8 @@ class PluginsManager(object):
 
     commands = {
         'respond_to': {},
-        'listen_to': {}
+        'listen_to': {},
+        'on_reaction': {}
     }
 
     def init_plugins(self):
