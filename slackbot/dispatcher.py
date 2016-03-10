@@ -127,7 +127,7 @@ class Message(object):
         return self._client.find_user_by_name(self._body['username'])
 
     def _gen_at_message(self, text):
-        text = '<@{}>: {}'.format(self._get_user_id(), text)
+        text = u'<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
     def _gen_reply(self, text):
