@@ -88,9 +88,9 @@ class Driver(object):
 
     def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
         if tosender is True:
-            match = r'^\<@{}\>: {}$'.format(self.driver_userid, match)
+            match = ur'^\<@{}\>: {}$'.format(self.driver_userid, match)
         else:
-            match = r'^{}$'.format(match)
+            match = ur'^{}$'.format(match)
 
         for _ in range(wait):
             time.sleep(1)
@@ -139,7 +139,7 @@ class Driver(object):
 
     def _has_got_message(self, channel, match, start=None, end=None):
         if channel.startswith('C'):
-            match = r'\<@{}\>: {}'.format(self.driver_userid, match)
+            match = ur'\<@{}\>: {}'.format(self.driver_userid, match)
         oldest = start or self._start_ts
         latest = end or time.time()
         func = self.slacker.channels.history if channel.startswith('C') \
@@ -152,7 +152,7 @@ class Driver(object):
 
     def _has_got_message_rtm(self, channel, match, tosender=True):
         if tosender is True:
-            match = r'\<@{}\>: {}'.format(self.driver_userid, match)
+            match = ur'\<@{}\>: {}'.format(self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
                 if event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):
