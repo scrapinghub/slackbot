@@ -35,8 +35,8 @@ class MessageDispatcher(object):
                     func(Message(self._client, msg), *args)
                 except:
                     logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
-                    reply = '[%s] I have problem when handling "%s"\n' % (func.__name__, text)
-                    reply += '```\n%s\n```' % traceback.format_exc()
+                    reply = '[{}] I have problem when handling "{}"\n'.format(func.__name__, text)
+                    reply += '```\n{}\n```'.format(traceback.format_exc())
                     self._client.rtm_send_message(msg['channel'], reply)
 
         if not responded and category == 'respond_to':
@@ -104,9 +104,9 @@ class MessageDispatcher(object):
         except ImportError:
 
             default_reply = [
-                'Bad command "%s", You can ask me one of the following questions:\n' % msg['text'],
+                u'Bad command "{}", You can ask me one of the following questions:\n'.format(msg['text']),
             ]
-            default_reply += ['    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
+            default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
                               for p, v in iteritems(self._plugins.commands['respond_to'])]
 
             default_reply = '\n'.join(to_utf8(default_reply))
@@ -197,5 +197,5 @@ class Message(object):
         return self._body
 
     def docs_reply(self):
-        reply = ['    • `{0}` {1}'.format(v.__name__, v.__doc__ or "") for p, v in iteritems(self._plugins.commands['respond_to'])]
+        reply = ['    • `{0}` {1}'.format(v.__name__, v.__doc__ or "") for _, v in iteritems(self._plugins.commands['respond_to'])]
         return '\n'.join(to_utf8(reply))

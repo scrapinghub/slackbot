@@ -1,6 +1,7 @@
+#coding: UTF-8
+import re
 from slackbot.bot import respond_to
 from slackbot.bot import listen_to
-import re
 
 
 @respond_to('hello$', re.IGNORECASE)
@@ -27,3 +28,8 @@ def hello_decorators(message):
 @listen_to('hey!')
 def hey(message):
     message.react('eggplant')
+
+
+@respond_to(u'你好')
+def hello_unicode_message(message):
+    message.reply(u'你好!')

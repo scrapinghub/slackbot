@@ -51,12 +51,12 @@ class Driver(object):
             if not online and not self._is_testbot_online():
                 break
         else:
-            raise AssertionError('test bot is still %s' % ('offline' if online else 'online'))
+            raise AssertionError('test bot is still {}'.format('offline' if online else 'online'))
 
     def _format_message(self, msg, tobot=True, colon=True):
         colon = ':' if colon else ''
         if tobot:
-            msg = '<@%s>%s %s' % (self.testbot_userid, colon, msg)
+            msg = u'<@{}>{} {}'.format(self.testbot_userid, colon, msg)
         return msg
 
     def send_direct_message(self, msg, tobot=True, colon=True):
@@ -88,9 +88,9 @@ class Driver(object):
 
     def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
         if tosender is True:
-            match = r'^\<@%s\>: %s$' % (self.driver_userid, match)
+            match = r'^\<@{}\>: {}$'.format(self.driver_userid, match)
         else:
-            match = r'^%s$' % match
+            match = r'^{}$'.format(match)
 
         for _ in range(wait):
             time.sleep(1)
@@ -98,7 +98,7 @@ class Driver(object):
                 for event in self.events:
                     if self._is_bot_message(event) and re.match(match, event['text'], re.DOTALL) is None:
                         raise AssertionError(
-                            'expected to get message matching "%s", but got message "%s"' % (match, event['text']))
+                            'expected to get message matching "{}", but got message "{}"'.format(match, event['text']))
 
     def ensure_no_channel_reply_from_bot(self, wait=5):
         for _ in range(wait):
@@ -107,7 +107,7 @@ class Driver(object):
                 for event in self.events:
                     if self._is_bot_message(event):
                         raise AssertionError(
-                            'expected to get nothing, but got message "%s"' % event['text'])
+                            'expected to get nothing, but got message "{}"'.format(event['text']))
 
     def wait_for_file_uploaded(self, name, maxwait=60):
         for _ in range(maxwait):
@@ -115,7 +115,7 @@ class Driver(object):
             if self._has_uploaded_file_rtm(name):
                 break
         else:
-            raise AssertionError('expected to get file "%s", but got nothing' % name)
+            raise AssertionError('expected to get file "{}", but got nothing'.format(name))
 
     def ensure_reaction_posted(self, emojiname, maxwait=5):
         for _ in range(maxwait):
@@ -123,7 +123,7 @@ class Driver(object):
             if self._has_reacted(emojiname):
                 break
         else:
-            raise AssertionError('expected to get reaction "%s", but got nothing' % emojiname)
+            raise AssertionError('expected to get reaction "{}", but got nothing'.format(emojiname))
 
     def _send_message_to_bot(self, channel, msg):
         self._start_ts = time.time()
@@ -135,11 +135,11 @@ class Driver(object):
             if self._has_got_message_rtm(channel, match, tosender):
                 break
         else:
-            raise AssertionError('expected to get message like "%s", but got nothing' % match)
+            raise AssertionError('expected to get message like "{}", but got nothing'.format(match))
 
     def _has_got_message(self, channel, match, start=None, end=None):
         if channel.startswith('C'):
-            match = r'\<@%s\>: %s' % (self.driver_userid, match)
+            match = r'\<@{}\>: {}'.format(self.driver_userid, match)
         oldest = start or self._start_ts
         latest = end or time.time()
         func = self.slacker.channels.history if channel.startswith('C') \
@@ -152,7 +152,7 @@ class Driver(object):
 
     def _has_got_message_rtm(self, channel, match, tosender=True):
         if tosender is True:
-            match = r'\<@%s\>: %s' % (self.driver_userid, match)
+            match = r'\<@{}\>: {}'.format(self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
                 if event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):

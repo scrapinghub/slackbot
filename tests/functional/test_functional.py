@@ -1,13 +1,14 @@
-#!/usr/bin/env python
+#coding: UTF-8
+
 
 """These function tests would start a slackbot, and use slack web api to drive
 the tests agains the bot.
 """
 
 import os
+from os.path import join, abspath, dirname, basename
 import subprocess
 import pytest
-from os.path import join, abspath, dirname, basename
 from tests.functional.driver import Driver
 from tests.functional.settings import (
     testbot_apitoken, testbot_username,
@@ -136,7 +137,7 @@ def test_bot_reply_to_message_multiple_decorators(driver):
     driver.send_direct_message('hello_decorators')
     driver.wait_for_bot_direct_message('hello!')
 
-@pytest.mark.skipif(not TRAVIS, reason="only run reconnect tests on travis builds") # pylint: disable=E1101
+@pytest.mark.skipif(not TRAVIS, reason="only run reconnect tests on travis builds")
 def test_bot_reconnect(driver):
     driver.wait_for_bot_online()
     stop_proxy()
@@ -144,3 +145,14 @@ def test_bot_reconnect(driver):
     start_proxy()
     driver.wait_for_bot_online()
     test_bot_respond_to_simple_message(driver)
+
+def test_bot_reply_with_unicode_message(driver):
+    driver.send_direct_message(u'你好')
+    driver.wait_for_bot_direct_message(u'你好')
+    driver.send_direct_message(u'你不明白，对吗？')
+    driver.wait_for_bot_direct_message('.*You can ask me.*')
+
+    driver.send_channel_message(u'你好')
+    driver.wait_for_bot_channel_message(u'你好!')
+    driver.send_channel_message(u'你不明白，对吗？')
+    driver.wait_for_bot_channel_message('.*You can ask me.*')
