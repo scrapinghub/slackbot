@@ -9,7 +9,7 @@ from functools import wraps
 
 import six
 from slackbot.manager import PluginsManager
-from slackbot.utils import to_utf8, WorkerPool
+from slackbot.utils import WorkerPool
 
 logger = logging.getLogger(__name__)
 
@@ -110,9 +110,14 @@ class MessageDispatcher(object):
             # pylint: disable=redefined-variable-type
             default_reply = u'\n'.join(default_reply)
 
-        self._client.rtm_send_message(msg['channel'], default_reply)
+        m = Message(self._client, msg)
+        m.reply(default_reply)
 
 def unicode_compact(func):
+    """
+    Make sure the first parameter of the decorated method to be a unicode
+    object.
+    """
     @wraps(func)
     def wrapped(self, text, *a, **kw):
         if not isinstance(text, six.text_type):
@@ -138,13 +143,15 @@ class Message(object):
         text = u'<@{}>: {}'.format(self._get_user_id(), text)
         return text
 
-    def _gen_reply(self, text):
+    @unicode_compact
+    def gen_reply(self, text):
         chan = self._body['channel']
         if chan.startswith('C') or chan.startswith('G'):
             return self._gen_at_message(text)
         else:
             return text
 
+    @unicode_compact
     def reply_webapi(self, text):
         """
             Send a reply to the sender using Web API
@@ -152,9 +159,10 @@ class Message(object):
             (This function supports formatted message
             when using a bot integration)
         """
-        text = self._gen_reply(text)
+        text = self.gen_reply(text)
         self.send_webapi(text)
 
+    @unicode_compact
     def send_webapi(self, text, attachments=None):
         """
             Send a reply using Web API
@@ -164,9 +172,10 @@ class Message(object):
         """
         self._client.send_message(
             self._body['channel'],
-            to_utf8(text),
+            text,
             attachments=attachments)
 
+    @unicode_compact
     def reply(self, text):
         """
             Send a reply to the sender using RTM API
@@ -174,9 +183,10 @@ class Message(object):
             (This function doesn't supports formatted message
             when using a bot integration)
         """
-        text = self._gen_reply(text)
+        text = self.gen_reply(text)
         self.send(text)
 
+    @unicode_compact
     def send(self, text):
         """
             Send a reply using RTM API
@@ -184,8 +194,7 @@ class Message(object):
             (This function doesn't supports formatted message
             when using a bot integration)
         """
-        self._client.rtm_send_message(
-            self._body['channel'], to_utf8(text))
+        self._client.rtm_send_message(self._body['channel'], text)
 
     def react(self, emojiname):
         """
@@ -207,4 +216,4 @@ class Message(object):
     def docs_reply(self):
         reply = [u'    • `{0}` {1}'.format(v.__name__, v.__doc__ or '')
                  for _, v in six.iteritems(self._plugins.commands['respond_to'])]
-        return '\n'.join(to_utf8(reply))
+        return u'\n'.join(reply)

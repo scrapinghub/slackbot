@@ -4,6 +4,7 @@ import re
 import time
 import slacker
 import websocket
+import six
 from six.moves import _thread, range
 
 
@@ -59,7 +60,7 @@ class Driver(object):
             msg = u'<@{}>{} {}'.format(self.testbot_userid, colon, msg)
         return msg
 
-    def send_direct_message(self, msg, tobot=True, colon=True):
+    def send_direct_message(self, msg, tobot=False, colon=True):
         msg = self._format_message(msg, tobot, colon)
         self._send_message_to_bot(self.dm_chan, msg)
 
@@ -88,9 +89,9 @@ class Driver(object):
 
     def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
         if tosender is True:
-            match = ur'^\<@{}\>: {}$'.format(self.driver_userid, match)
+            match = six.text_type(r'^\<@{}\>: {}$').format(self.driver_userid, match)
         else:
-            match = ur'^{}$'.format(match)
+            match = u'^{}$'.format(match)
 
         for _ in range(wait):
             time.sleep(1)
@@ -98,7 +99,7 @@ class Driver(object):
                 for event in self.events:
                     if self._is_bot_message(event) and re.match(match, event['text'], re.DOTALL) is None:
                         raise AssertionError(
-                            'expected to get message matching "{}", but got message "{}"'.format(match, event['text']))
+                            u'expected to get message matching "{}", but got message "{}"'.format(match, event['text']))
 
     def ensure_no_channel_reply_from_bot(self, wait=5):
         for _ in range(wait):
@@ -139,7 +140,7 @@ class Driver(object):
 
     def _has_got_message(self, channel, match, start=None, end=None):
         if channel.startswith('C'):
-            match = ur'\<@{}\>: {}'.format(self.driver_userid, match)
+            match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         oldest = start or self._start_ts
         latest = end or time.time()
         func = self.slacker.channels.history if channel.startswith('C') \
@@ -152,7 +153,7 @@ class Driver(object):
 
     def _has_got_message_rtm(self, channel, match, tosender=True):
         if tosender is True:
-            match = ur'\<@{}\>: {}'.format(self.driver_userid, match)
+            match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
                 if event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):

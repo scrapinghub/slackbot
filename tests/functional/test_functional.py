@@ -127,7 +127,7 @@ def test_bot_ignores_unknown_message_noresponse_tochannel(driver):
 
 def test_bot_send_usage_unknown_message_response_tosender(driver):
     driver.send_channel_message('unknown message', tobot=True)
-    driver.ensure_only_specificmessage_from_bot('Bad command "unknown message".+', tosender=False)
+    driver.ensure_only_specificmessage_from_bot('Bad command "unknown message".+', tosender=True)
 
 def test_bot_reply_to_message_multiple_decorators(driver):
     driver.send_channel_message('hello_decorators')
@@ -155,4 +155,4 @@ def test_bot_reply_with_unicode_message(driver):
     driver.send_channel_message(u'你好')
     driver.wait_for_bot_channel_message(u'你好!')
     driver.send_channel_message(u'你不明白，对吗？')
-    driver.wait_for_bot_channel_message('.*You can ask me.*')
+    driver.wait_for_bot_channel_message(u'.*You can ask me.*')
