@@ -10,10 +10,14 @@ from functools import wraps
 import six
 from slackbot.manager import PluginsManager
 from slackbot.utils import WorkerPool
+from slackbot import settings
 
 logger = logging.getLogger(__name__)
 
-AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
+never_matches_anything = 'a^'
+regex_aliases = '|'.join([re.escape(s) for s in settings.ALIASES.split(',')]) if hasattr(settings, 'ALIASES') else never_matches_anything
+
+AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(\w+)\>|({})):? (.*)$'.format(regex_aliases))
 
 
 class MessageDispatcher(object):
@@ -72,13 +76,16 @@ class MessageDispatcher(object):
     def filter_text(self, msg):
         text = msg.get('text', '')
         channel = msg['channel']
+        bot_name = self._client.login_data['self']['id']
 
         if channel[0] == 'C' or channel[0] == 'G':
             m = AT_MESSAGE_MATCHER.match(text)
             if not m:
                 return
-            atuser, text = m.groups()
-            if atuser != self._client.login_data['self']['id']:
+            atuser, alias, text = m.groups()
+            if alias:
+                atuser = bot_name
+            if atuser != bot_name:
                 # a channel message at other user
                 return
             logger.debug('got an AT message: %s', text)
