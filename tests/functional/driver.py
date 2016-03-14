@@ -247,7 +247,7 @@ class Driver(object):
                 break
         else:
             raise RuntimeError('Have you created the private group {} for testing?'.format(
-                self.group_name))
+                self.test_group))
 
     def _invite_testbot_to_channel(self):
         if self.testbot_userid not in self.slacker.channels.info(self.cm_chan).body['channel']['members']:
