@@ -14,10 +14,11 @@ from slackbot import settings
 
 logger = logging.getLogger(__name__)
 
-never_matches_anything = 'a^'
-regex_aliases = '|'.join([re.escape(s) for s in settings.ALIASES.split(',')]) if hasattr(settings, 'ALIASES') else never_matches_anything
+alias_regex = ''
+if hasattr(settings, 'ALIASES'):
+    alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
 
-AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(\w+)\>|({})):? (.*)$'.format(regex_aliases))
+AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))
 
 
 class MessageDispatcher(object):
@@ -74,26 +75,33 @@ class MessageDispatcher(object):
             self._pool.add_task(('listen_to', msg))
 
     def filter_text(self, msg):
-        text = msg.get('text', '')
+        full_text = msg.get('text', '')
         channel = msg['channel']
         bot_name = self._client.login_data['self']['id']
+        m = AT_MESSAGE_MATCHER.match(full_text)
 
         if channel[0] == 'C' or channel[0] == 'G':
-            m = AT_MESSAGE_MATCHER.match(text)
             if not m:
                 return
-            atuser, alias, text = m.groups()
+
+            matches = m.groupdict()
+
+            atuser = matches.get('atuser', None)
+            text = matches.get('text', None)
+            alias = matches.get('alias', None)
+
             if alias:
                 atuser = bot_name
+
             if atuser != bot_name:
                 # a channel message at other user
                 return
+
             logger.debug('got an AT message: %s', text)
             msg['text'] = text
         else:
-            m = AT_MESSAGE_MATCHER.match(text)
             if m:
-                msg['text'] = m.group(2)
+                msg['text'] = m.get('text', None)
         return msg
 
     def loop(self):
