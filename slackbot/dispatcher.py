@@ -14,18 +14,18 @@ from slackbot import settings
 
 logger = logging.getLogger(__name__)
 
-alias_regex = ''
-if hasattr(settings, 'ALIASES'):
-    alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
-
-AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))
-
 
 class MessageDispatcher(object):
     def __init__(self, slackclient, plugins):
         self._client = slackclient
         self._pool = WorkerPool(self.dispatch_msg)
         self._plugins = plugins
+
+        alias_regex = ''
+        if hasattr(settings, 'ALIASES') and settings.ALIASES != '':
+            alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
+
+        self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))
 
     def start(self):
         self._pool.start()
@@ -74,11 +74,14 @@ class MessageDispatcher(object):
         else:
             self._pool.add_task(('listen_to', msg))
 
+    def _get_bot_id(self):
+        return self._client.login_data['self']['id']
+
     def filter_text(self, msg):
         full_text = msg.get('text', '')
         channel = msg['channel']
-        bot_name = self._client.login_data['self']['id']
-        m = AT_MESSAGE_MATCHER.match(full_text)
+        bot_name = self._get_bot_id()
+        m = self.AT_MESSAGE_MATCHER.match(full_text)
 
         if channel[0] == 'C' or channel[0] == 'G':
             if not m:
@@ -101,7 +104,7 @@ class MessageDispatcher(object):
             msg['text'] = text
         else:
             if m:
-                msg['text'] = m.get('text', None)
+                msg['text'] = m.groupdict().get('text', None)
         return msg
 
     def loop(self):

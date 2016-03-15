@@ -11,6 +11,16 @@ PLUGINS = [
 # API_TOKEN = '###token###'
 
 '''
+Setup a comma delimited list of aliases that the bot will respond to.
+
+Example: if you set ALIASES='!,$' then a bot which would respond to:
+'botname hello'
+will now also respond to
+'$ hello'
+'''
+ALIASES = ''
+
+'''
 If you use Slack Web API to send messages (with send_webapi() or reply_webapi()),
 you can customize the bot logo by providing Icon or Emoji.
 If you use Slack RTM API to send messages (with send() or reply()),
