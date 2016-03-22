@@ -22,7 +22,7 @@ class MessageDispatcher(object):
         self._plugins = plugins
 
         alias_regex = ''
-        if hasattr(settings, 'ALIASES') and settings.ALIASES != '':
+        if getattr(settings, 'ALIASES', None):
             alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
 
         self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))
