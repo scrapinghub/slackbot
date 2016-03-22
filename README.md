@@ -11,6 +11,12 @@ A chat bot for [Slack](https://slack.com) inspired by [llimllib/limbo](https://g
 * Python3 Support
 * [Full-fledged functional tests](tests/functional/test_functional.py)
 
+## Index:
+1. [Installation](#installation)
+1. [Usage](#usage)
+1. [Create custom plugins](#create-plugins)
+1. [Discussion](#discussion)
+
 ## Installation
 
 
@@ -29,48 +35,55 @@ First you need to get the slack api token for your bot. You have two options:
 
 
 ### Configure the bot
-First create a `slackbot_settings.py` and a `run.py` in your own instance of slackbot.
-
-##### Configure the api token
-
-Then you need to configure the `API_TOKEN` in a python module `slackbot_settings.py`, which must be located in a python import path. This will be automatically imported by the bot.
-
-slackbot_settings.py:
-
-```python
-API_TOKEN = "<your-api-token>"
-```
-
-Alternatively, you can use the environment variable `SLACKBOT_API_TOKEN`.
-
-##### Run the bot
+Make sure you have [installed](#installation) slackbot and then create a `run.py` with your own instance of slackbot. like this:
 
 ```python
 from slackbot.bot import Bot
+
 def main():
-    bot = Bot()
+    bot = Bot(
+        api_token="YOUR_SLACK_API_TOKEN",
+        plugins=["path_to_plugins"],
+        default_reply="Hello World"
+    )
     bot.run()
 
 if __name__ == "__main__":
     main()
 ```
-##### Configure the default answer
-Add to `slackbot_settings.py` a default_reply:
-```python
-default_reply = "Sorry but I didn't understood you" 
+
+##### Run the bot
+Launch the file from your shell. We recommend to daemonize the process.
+```shell
+python3 run.py
 ```
 
-##### Configure the docs answer
-The `message` attribute passed to [your custom plugins](#create-plugins) has an special function `message.docs_reply()` that will parse all the plugins available and return the Docs in each of them.
+##### Default reply
+The default reply can be either a string or a function. This will be executed whenever the bot doesn't recognize a pattern.
+
+If you decide to create your own function, you will have to create a Message instance. This way you can access any variable at the client you might be interested on.
+```python
+from slackbot.dispatcher import Message
+
+def my_func(client, msg):
+    m = Message(client, msg)
+    m.reply("Whatever")
+```
+
+###### Configure the docs answer
+The `Message` object, the same one is passed instantiated as an attribute to [your custom plugins](#create-plugins) has an special function `message.docs_reply()` that will parse all the plugins available and return the `__doc__` in each one of them as a message.
 
 ##### Configure the plugins
-Add [your plugin modules](#create-plugins) to a `PLUGINS` list in `slackbot_settings.py`:
+Add [your plugin modules](#create-plugins) to the instantiation of your bot:
 
 ```python
-PLUGINS = [
-    'slackbot.plugins',
-    'mybot.plugins',
-]
+Bot(
+    "API_TOKEN",
+    plugins = [
+        'slackbot.plugins',
+        'mybot.plugins'
+    ]
+)
 ```
 
 Now you can talk to your bot in your slack client!
@@ -150,13 +163,15 @@ def stats(message, start_date=None, end_date=None):
 ```
 
 
-And add the plugins module to `PLUGINS` list of slackbot settings, e.g. slackbot_settings.py:
+And add the relative path to the plugins modules you created at the slackbot instantiation:
 
 ```python
-PLUGINS = [
-    'slackbot.plugins',
-    'mybot.plugins',
-]
+my_bot = Bot(
+    "API_TOKEN",
+    plugins = [
+        'mybot.plugins'
+    ]
+)
 ```
 
 ## Discussion

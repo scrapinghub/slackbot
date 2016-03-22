@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import imp
-import importlib
-import logging
 import re
+import sys
 import time
-from glob import glob
+import logging
 from six.moves import _thread
 from slackbot import settings
 from slackbot.manager import PluginsManager
@@ -16,20 +14,29 @@ logger = logging.getLogger(__name__)
 
 
 class Bot(object):
-    def __init__(self):
-        self._client = SlackClient(
-            settings.API_TOKEN,
-            bot_icon=settings.BOT_ICON if hasattr(settings, 'BOT_ICON') else None,
-            bot_emoji=settings.BOT_EMOJI if hasattr(settings, 'BOT_EMOJI') else None
-        )
-        self._plugins = PluginsManager()
-        self._dispatcher = MessageDispatcher(self._client, self._plugins)
+    def __init__(self, api_token=None, plugins_dir=None, bot_icon=None, bot_emoji=None, default_reply=None, debug=False):
+
+        if not api_token:
+            # Backward compatibility; Looks for a slackbot_settings.py file
+            client = SlackClient(
+                settings.API_TOKEN,
+                bot_icon=settings.BOT_ICON if hasattr(settings, 'BOT_ICON') else None,
+                bot_emoji=settings.BOT_EMOJI if hasattr(settings, 'BOT_EMOJI') else None
+            )
+        else:
+            client = SlackClient(api_token, bot_icon=bot_icon, bot_emoji=bot_emoji)
+
+        self._client = client
+        self._plugins = PluginsManager(plugins_dir)
+        self._dispatcher = MessageDispatcher(self._client, self._plugins, default_reply)
+        self._debug = debug
 
     def run(self):
         self._plugins.init_plugins()
         self._dispatcher.start()
         self._client.rtm_connect()
         _thread.start_new_thread(self._keepactive, tuple())
+        self._logging_setting()
         logger.info('connected to slack RTM api')
         self._dispatcher.loop()
 
@@ -38,6 +45,16 @@ class Bot(object):
         while True:
             time.sleep(30 * 60)
             self._client.ping()
+
+    def _logging_setting(self):
+        kw = {
+            'format': '[%(asctime)s] %(message)s',
+            'datefmt': '%m/%d/%Y %H:%M:%S',
+            'level': logging.DEBUG if self._debug else logging.INFO,
+            'stream': sys.stdout,
+        }
+        logging.basicConfig(**kw)
+        logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARNING)
 
 
 def respond_to(matchstr, flags=0):
