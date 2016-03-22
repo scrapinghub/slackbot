@@ -5,9 +5,9 @@ import logging
 import re
 import time
 import traceback
-from functools import wraps
-
 import six
+from functools import wraps
+from slackbot import settings
 from slackbot.manager import PluginsManager
 from slackbot.utils import WorkerPool
 
@@ -17,10 +17,11 @@ AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
 
 
 class MessageDispatcher(object):
-    def __init__(self, slackclient, plugins):
+    def __init__(self, slackclient, plugins, default_reply=None):
         self._client = slackclient
         self._pool = WorkerPool(self.dispatch_msg)
         self._plugins = plugins
+        self._override_reply = default_reply
 
     def start(self):
         self._pool.start()
@@ -99,19 +100,26 @@ class MessageDispatcher(object):
             time.sleep(1)
 
     def _default_reply(self, msg):
-        try:
-            from slackbot_settings import default_reply
-        except ImportError:
-            default_reply = [
-                u'Bad command "{}", You can ask me one of the following questions:\n'.format(msg['text']),
-            ]
-            default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
-                              for p, v in six.iteritems(self._plugins.commands['respond_to'])]
-            # pylint: disable=redefined-variable-type
-            default_reply = u'\n'.join(default_reply)
+        if self._override_reply:
+            if six.callable(self._override_reply):
+                self._override_reply(self._client, msg)
+            else:
+                m = Message(self._client, msg)
+                m.reply(self._override_reply)
+        else:
+            if hasattr(settings, 'default_reply'):
+                default_reply = settings.default_reply
+            else:
+                default_reply = [
+                    u'Bad command "{}", You can ask me one of the following questions:\n'.format(msg['text']),
+                ]
+                default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
+                                  for p, v in six.iteritems(self._plugins.commands['respond_to'])]
+                # pylint: disable=redefined-variable-type
+                default_reply = u'\n'.join(default_reply)
 
-        m = Message(self._client, msg)
-        m.reply(default_reply)
+            m = Message(self._client, msg)
+            m.reply(default_reply)
 
 def unicode_compact(func):
     """
