@@ -1,12 +1,12 @@
 import pytest
 
-aliases = ['!', '$', 'botbro']
-fake_bot_id = 'US99999'
-fake_bot_name = '<@' + fake_bot_id + '>'
+TEST_ALIASES = ['!', '$', 'botbro']
+FAKE_BOT_ID = 'US99999'
+FAKE_BOT_NAME = '<@' + FAKE_BOT_ID + '>'
 
 @pytest.fixture()
 def setup_aliases(monkeypatch):
-    monkeypatch.setattr('slackbot.settings.ALIASES', ','.join(aliases))
+    monkeypatch.setattr('slackbot.settings.ALIASES', ','.join(TEST_ALIASES))
 
 
 @pytest.fixture()
@@ -14,7 +14,7 @@ def dispatcher(monkeypatch):
     from slackbot.dispatcher import MessageDispatcher
 
     def return_fake_bot_id():
-        return fake_bot_id
+        return FAKE_BOT_ID
     dispatcher = MessageDispatcher(None, None)
     monkeypatch.setattr(dispatcher, '_get_bot_id', return_fake_bot_id)
     return dispatcher
@@ -25,7 +25,7 @@ def test_aliases(setup_aliases, dispatcher):
         'channel': 'C99999'
     }
 
-    for a in aliases:
+    for a in TEST_ALIASES:
         msg['text'] = a + ' hello'
         msg = dispatcher.filter_text(msg)
         assert msg['text'] == 'hello'
@@ -45,7 +45,7 @@ def test_nondirectmsg_works(dispatcher):
 
 def test_botname_works(dispatcher):
     msg = {
-        'text': fake_bot_name + ' hello',
+        'text': FAKE_BOT_NAME + ' hello',
         'channel': 'C99999'
     }
 
@@ -55,7 +55,7 @@ def test_botname_works(dispatcher):
 
 def test_botname_works_with_aliases_present(setup_aliases, dispatcher):
     msg = {
-        'text': fake_bot_name + ' hello',
+        'text': FAKE_BOT_NAME + ' hello',
         'channel': 'G99999'
     }
 
@@ -67,7 +67,7 @@ def test_no_aliases_doesnt_work(dispatcher):
     msg = {
         'channel': 'G99999'
     }
-    for a in aliases:
+    for a in TEST_ALIASES:
         text = a + ' hello'
         msg['text'] = text
         assert dispatcher.filter_text(msg) is None
@@ -86,7 +86,7 @@ def test_direct_message(dispatcher):
 
 def test_direct_message_with_name(dispatcher):
     msg = {
-        'text': fake_bot_name + ' hello',
+        'text': FAKE_BOT_NAME + ' hello',
         'channel': 'D99999'
     }
 
