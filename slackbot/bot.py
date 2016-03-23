@@ -37,6 +37,9 @@ class Bot(object):
         logger.info('keep active thread started')
         while True:
             time.sleep(30 * 60)
+            users = dict((u['id'], u) for u in self._client.webapi.users.list()['body']['members'])
+            if users != self._client.users:
+                self._client.users = users
             self._client.ping()
 
 
