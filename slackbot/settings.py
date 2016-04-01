@@ -8,6 +8,8 @@ PLUGINS = [
     'slackbot.plugins',
 ]
 
+ERRORS_TO = None
+
 # API_TOKEN = '###token###'
 
 '''
