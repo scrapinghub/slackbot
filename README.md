@@ -158,7 +158,3 @@ PLUGINS = [
     'mybot.plugins',
 ]
 ```
-
-## Discussion
-
-* :hash: #python-slackbot on [freenode](https://webchat.freenode.net/?channels=python-slackbot)
