@@ -23,6 +23,7 @@ class MessageDispatcher(object):
 
         alias_regex = ''
         if getattr(settings, 'ALIASES', None):
+            logger.info('using aliases %s', settings.ALIASES)
             alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
 
         self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))

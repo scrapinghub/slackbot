@@ -10,7 +10,7 @@ from os.path import join, abspath, dirname, basename
 import subprocess
 import pytest
 from tests.functional.driver import Driver
-from tests.functional.settings import (
+from tests.functional.slackbot_settings import (
     testbot_apitoken, testbot_username,
     driver_apitoken, driver_username, test_channel, test_group
 )
@@ -32,7 +32,8 @@ def _start_bot_process():
         args = ['slackbot-test-ctl', 'run'] + args
     env = dict(os.environ)
     env['SLACKBOT_API_TOKEN'] = testbot_apitoken
-    env['SLACKBOT_TEST'] = '1'
+    env['SLACKBOT_TEST'] = 'true'
+    env['PYTHONPATH'] = ':'.join([dirname(abspath(__file__)), env.get('PYTHONPATH', '')])
     return subprocess.Popen(args, env=env)
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101
