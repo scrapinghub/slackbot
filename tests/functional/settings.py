@@ -15,6 +15,7 @@ driver_apitoken = None
 driver_username = None
 test_channel = None
 test_group = None
+ALIASES = ",".join(["!", "$"])
 
 for key in KEYS:
     envkey = 'SLACKBOT_' + key.upper()

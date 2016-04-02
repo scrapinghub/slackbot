@@ -10,10 +10,9 @@ from functools import wraps
 import six
 from slackbot.manager import PluginsManager
 from slackbot.utils import WorkerPool
+from slackbot import settings
 
 logger = logging.getLogger(__name__)
-
-AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
 
 
 class MessageDispatcher(object):
@@ -21,6 +20,12 @@ class MessageDispatcher(object):
         self._client = slackclient
         self._pool = WorkerPool(self.dispatch_msg)
         self._plugins = plugins
+
+        alias_regex = ''
+        if getattr(settings, 'ALIASES', None):
+            alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
+
+        self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))
 
     def start(self):
         self._pool.start()
@@ -69,24 +74,37 @@ class MessageDispatcher(object):
         else:
             self._pool.add_task(('listen_to', msg))
 
+    def _get_bot_id(self):
+        return self._client.login_data['self']['id']
+
     def filter_text(self, msg):
-        text = msg.get('text', '')
+        full_text = msg.get('text', '')
         channel = msg['channel']
+        bot_name = self._get_bot_id()
+        m = self.AT_MESSAGE_MATCHER.match(full_text)
 
         if channel[0] == 'C' or channel[0] == 'G':
-            m = AT_MESSAGE_MATCHER.match(text)
             if not m:
                 return
-            atuser, text = m.groups()
-            if atuser != self._client.login_data['self']['id']:
+
+            matches = m.groupdict()
+
+            atuser = matches.get('atuser', None)
+            text = matches.get('text', None)
+            alias = matches.get('alias', None)
+
+            if alias:
+                atuser = bot_name
+
+            if atuser != bot_name:
                 # a channel message at other user
                 return
+
             logger.debug('got an AT message: %s', text)
             msg['text'] = text
         else:
-            m = AT_MESSAGE_MATCHER.match(text)
             if m:
-                msg['text'] = m.group(2)
+                msg['text'] = m.groupdict().get('text', None)
         return msg
 
     def loop(self):

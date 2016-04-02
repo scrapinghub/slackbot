@@ -156,3 +156,7 @@ def test_bot_reply_with_unicode_message(driver):
     driver.wait_for_bot_channel_message(u'你好!')
     driver.send_channel_message(u'你不明白，对吗？')
     driver.wait_for_bot_channel_message(u'.*You can ask me.*')
+
+def test_bot_reply_with_alias_message(driver):
+    driver.send_channel_message("! hello", False, False)
+    driver.wait_for_bot_channel_message("hello sender!", tosender=True)
