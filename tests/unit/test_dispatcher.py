@@ -17,7 +17,7 @@ def dispatcher(monkeypatch):
 
     def return_fake_bot_id():
         return FAKE_BOT_ID
-    dispatcher = MessageDispatcher(None, None)
+    dispatcher = MessageDispatcher(None, None, None)
     monkeypatch.setattr(dispatcher, '_get_bot_id', return_fake_bot_id)
     monkeypatch.setattr(dispatcher, '_get_bot_name', lambda: FAKE_BOT_NAME)
     return dispatcher
