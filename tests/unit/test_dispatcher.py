@@ -2,7 +2,7 @@ import pytest
 
 TEST_ALIASES = ['!', '$', 'botbro']
 FAKE_BOT_ID = 'US99999'
-FAKE_BOT_NAME = '<@' + FAKE_BOT_ID + '>'
+FAKE_BOT_ATNAME = '<@' + FAKE_BOT_ID + '>'
 
 @pytest.fixture()
 def setup_aliases(monkeypatch):
@@ -29,6 +29,9 @@ def test_aliases(setup_aliases, dispatcher):
         msg['text'] = a + ' hello'
         msg = dispatcher.filter_text(msg)
         assert msg['text'] == 'hello'
+        msg['text'] = a + 'hello'
+        msg = dispatcher.filter_text(msg)
+        assert msg['text'] == 'hello'
 
 
 def test_nondirectmsg_works(dispatcher):
@@ -45,7 +48,7 @@ def test_nondirectmsg_works(dispatcher):
 
 def test_botname_works(dispatcher):
     msg = {
-        'text': FAKE_BOT_NAME + ' hello',
+        'text': FAKE_BOT_ATNAME + ' hello',
         'channel': 'C99999'
     }
 
@@ -55,7 +58,7 @@ def test_botname_works(dispatcher):
 
 def test_botname_works_with_aliases_present(setup_aliases, dispatcher):
     msg = {
-        'text': FAKE_BOT_NAME + ' hello',
+        'text': FAKE_BOT_ATNAME + ' hello',
         'channel': 'G99999'
     }
 
@@ -69,6 +72,10 @@ def test_no_aliases_doesnt_work(dispatcher):
     }
     for a in TEST_ALIASES:
         text = a + ' hello'
+        msg['text'] = text
+        assert dispatcher.filter_text(msg) is None
+        assert msg['text'] == text
+        text = a + 'hello'
         msg['text'] = text
         assert dispatcher.filter_text(msg) is None
         assert msg['text'] == text
@@ -86,7 +93,7 @@ def test_direct_message(dispatcher):
 
 def test_direct_message_with_name(dispatcher):
     msg = {
-        'text': FAKE_BOT_NAME + ' hello',
+        'text': FAKE_BOT_ATNAME + ' hello',
         'channel': 'D99999'
     }
 

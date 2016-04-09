@@ -99,6 +99,11 @@ def test_bot_reply_to_channel_message(driver):
     driver.wait_for_bot_channel_message('hello sender!')
     driver.send_channel_message('hello', colon=False)
     driver.wait_for_bot_channel_message('hello sender!')
+    driver.send_channel_message('hello', space=False)
+    driver.wait_for_bot_channel_message('hello sender!')
+    # This is hard for a user to do, but why not test it?
+    driver.send_channel_message('hello', colon=False, space=False)
+    driver.wait_for_bot_channel_message('hello sender!')
 
 def test_bot_listen_to_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
@@ -160,4 +165,6 @@ def test_bot_reply_with_unicode_message(driver):
 
 def test_bot_reply_with_alias_message(driver):
     driver.send_channel_message("! hello", False, False)
+    driver.wait_for_bot_channel_message("hello sender!", tosender=True)
+    driver.send_channel_message('!hello', False, False)
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
