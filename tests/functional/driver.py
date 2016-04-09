@@ -54,27 +54,29 @@ class Driver(object):
         else:
             raise AssertionError('test bot is still {}'.format('offline' if online else 'online'))
 
-    def _format_message(self, msg, tobot=True, colon=True, space=True):
+    def _format_message(self, msg, tobot=True, toname=False, colon=True,
+                        space=True):
         colon = ':' if colon else ''
         space = ' ' if space else ''
         if tobot:
             msg = u'<@{}>{}{}{}'.format(self.testbot_userid, colon, space, msg)
+        elif toname:
+            msg = u'{}{}{}{}'.format(self.testbot_username, colon, space, msg)
         return msg
 
     def send_direct_message(self, msg, tobot=False, colon=True):
         msg = self._format_message(msg, tobot, colon)
         self._send_message_to_bot(self.dm_chan, msg)
 
-    def _send_channel_message(self, chan, msg, tobot=True, colon=True,
-                              space=True):
-        msg = self._format_message(msg, tobot, colon, space)
+    def _send_channel_message(self, chan, msg, **kwargs):
+        msg = self._format_message(msg, **kwargs)
         self._send_message_to_bot(chan, msg)
 
-    def send_channel_message(self, msg, tobot=True, colon=True, space=True):
-        self._send_channel_message(self.cm_chan, msg, tobot, colon, space)
+    def send_channel_message(self, msg, **kwargs):
+        self._send_channel_message(self.cm_chan, msg, **kwargs)
 
-    def send_group_message(self, msg, tobot=True, colon=True):
-        self._send_channel_message(self.gm_chan, msg, tobot, colon)
+    def send_group_message(self, msg, **kwargs):
+        self._send_channel_message(self.gm_chan, msg, **kwargs)
 
     def wait_for_bot_direct_message(self, match):
         self._wait_for_bot_message(self.dm_chan, match, tosender=False)
@@ -86,8 +88,8 @@ class Driver(object):
     def wait_for_bot_channel_message(self, match, tosender=True):
         self._wait_for_bot_message(self.cm_chan, match, tosender=tosender)
 
-    def wait_for_bot_group_message(self, match):
-        self._wait_for_bot_message(self.gm_chan, match, tosender=True)
+    def wait_for_bot_group_message(self, match, tosender=True):
+        self._wait_for_bot_message(self.gm_chan, match, tosender=tosender)
 
     def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
         if tosender is True:

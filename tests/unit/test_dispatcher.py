@@ -3,6 +3,8 @@ import pytest
 TEST_ALIASES = ['!', '$', 'botbro']
 FAKE_BOT_ID = 'US99999'
 FAKE_BOT_ATNAME = '<@' + FAKE_BOT_ID + '>'
+FAKE_BOT_NAME = 'fakebot'
+
 
 @pytest.fixture()
 def setup_aliases(monkeypatch):
@@ -17,6 +19,7 @@ def dispatcher(monkeypatch):
         return FAKE_BOT_ID
     dispatcher = MessageDispatcher(None, None)
     monkeypatch.setattr(dispatcher, '_get_bot_id', return_fake_bot_id)
+    monkeypatch.setattr(dispatcher, '_get_bot_name', lambda: FAKE_BOT_NAME)
     return dispatcher
 
 
@@ -46,12 +49,25 @@ def test_nondirectmsg_works(dispatcher):
     assert dispatcher.filter_text(msg) is None
 
 
-def test_botname_works(dispatcher):
+def test_bot_atname_works(dispatcher):
     msg = {
         'text': FAKE_BOT_ATNAME + ' hello',
         'channel': 'C99999'
     }
 
+    msg = dispatcher.filter_text(msg)
+    assert msg['text'] == 'hello'
+
+
+def test_bot_name_works(dispatcher):
+    msg = {
+        'channel': 'C99999'
+    }
+
+    msg['text'] = FAKE_BOT_NAME + ': hello'
+    msg = dispatcher.filter_text(msg)
+    assert msg['text'] == 'hello'
+    msg['text'] = FAKE_BOT_NAME + ':hello'
     msg = dispatcher.filter_text(msg)
     assert msg['text'] == 'hello'
 

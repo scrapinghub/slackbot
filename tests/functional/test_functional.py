@@ -105,6 +105,28 @@ def test_bot_reply_to_channel_message(driver):
     driver.send_channel_message('hello', colon=False, space=False)
     driver.wait_for_bot_channel_message('hello sender!')
 
+def test_bot_channel_reply_to_name_colon(driver):
+    driver.send_channel_message('hello', tobot=False, toname=True)
+    driver.wait_for_bot_channel_message('hello sender!')
+    driver.send_channel_message('hello', tobot=False, toname=True, space=False)
+    driver.wait_for_bot_channel_message('hello sender!')
+    driver.send_channel_message('hello', tobot=False, toname=True, colon=False)
+    driver.wait_for_bot_channel_message('hello channel!', tosender=False)
+    driver.send_channel_message('hello', tobot=False, toname=True, colon=False,
+                                space=False)
+    driver.wait_for_bot_channel_message('hello channel!', tosender=False)
+
+def test_bot_group_reply_to_name_colon(driver):
+    driver.send_group_message('hello', tobot=False, toname=True)
+    driver.wait_for_bot_group_message('hello sender!')
+    driver.send_group_message('hello', tobot=False, toname=True, space=False)
+    driver.wait_for_bot_group_message('hello sender!')
+    driver.send_group_message('hello', tobot=False, toname=True, colon=False)
+    driver.wait_for_bot_group_message('hello channel!', tosender=False)
+    driver.send_group_message('hello', tobot=False, toname=True, colon=False,
+                                space=False)
+    driver.wait_for_bot_group_message('hello channel!', tosender=False)
+
 def test_bot_listen_to_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.wait_for_bot_channel_message('hello channel!', tosender=False)
@@ -164,7 +186,7 @@ def test_bot_reply_with_unicode_message(driver):
     driver.wait_for_bot_channel_message(u'.*You can ask me.*')
 
 def test_bot_reply_with_alias_message(driver):
-    driver.send_channel_message("! hello", False, False)
+    driver.send_channel_message("! hello", tobot=False, colon=False)
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
-    driver.send_channel_message('!hello', False, False)
+    driver.send_channel_message('!hello', tobot=False, colon=False)
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
