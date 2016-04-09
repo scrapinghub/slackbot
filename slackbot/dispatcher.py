@@ -26,7 +26,7 @@ class MessageDispatcher(object):
             logger.info('using aliases %s', settings.ALIASES)
             alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
 
-        self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? ?(?P<text>.*)$'.format(alias_regex))
+        self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>:?{}) ?(?P<text>.*)$'.format(alias_regex))
 
     def start(self):
         self._pool.start()
