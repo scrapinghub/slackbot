@@ -129,6 +129,7 @@ class Driver(object):
             raise AssertionError('expected to get reaction "{}", but got nothing'.format(emojiname))
 
     def _send_message_to_bot(self, channel, msg):
+        self.clear_events()
         self._start_ts = time.time()
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
 
