@@ -43,10 +43,18 @@ class PluginsManager(object):
         else:
             from importlib.util import find_spec as importlib_find
 
-            path_name = importlib_find(plugin).submodule_search_locations[0]
+            path_name = importlib_find(plugin)
+            try:
+                path_name = path_name.submodule_search_locations[0]
+            except TypeError:
+                path_name = path_name.origin
 
-        for pyfile in glob('{}/[!_]*.py'.format(path_name)):
-            module = '.'.join((plugin, os.path.split(pyfile)[-1][:-3]))
+        module_list = [plugin]
+        if not path_name.endswith('.py'):
+            module_list = glob('{}/[!_]*.py'.format(path_name))
+            module_list = ['.'.join((plugin, os.path.split(f)[-1][:-3])) for f
+                           in module_list]
+        for module in module_list:
             try:
                 import_module(module)
             except:
