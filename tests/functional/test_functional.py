@@ -33,7 +33,6 @@ def _start_bot_process():
     env = dict(os.environ)
     env['SLACKBOT_API_TOKEN'] = testbot_apitoken
     env['SLACKBOT_TEST'] = 'true'
-    env['PYTHONPATH'] = ':'.join([dirname(abspath(__file__)), env.get('PYTHONPATH', '')])
     return subprocess.Popen(args, env=env)
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101

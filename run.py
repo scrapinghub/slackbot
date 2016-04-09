@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import logging
 import logging.config
-from slackbot import settings
-from slackbot.bot import Bot
 
 
 def main():
+    if os.environ.get('SLACKBOT_TEST'):
+        sys.path.insert(0, os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'tests/functional'))
+
+    from slackbot import settings
+    from slackbot.bot import Bot
+
     kw = {
         'format': '[%(asctime)s] %(message)s',
         'datefmt': '%m/%d/%Y %H:%M:%S',
