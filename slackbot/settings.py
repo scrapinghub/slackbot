@@ -33,6 +33,9 @@ effect.
 # BOT_ICON = 'http://lorempixel.com/64/64/abstract/7/'
 # BOT_EMOJI = ':godmode:'
 
+'''Specify a different reply when the bot is messaged with no matching cmd'''
+DEFAULT_REPLY = None
+
 for key in os.environ:
     if key[:9] == 'SLACKBOT_':
         name = key[9:]
@@ -45,3 +48,9 @@ except ImportError:
         from local_settings import *
     except ImportError:
         pass
+
+# convert default_reply to DEFAULT_REPLY
+try:
+    DEFAULT_REPLY = default_reply
+except NameError:
+    pass
