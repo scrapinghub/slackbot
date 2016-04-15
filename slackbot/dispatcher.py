@@ -26,7 +26,7 @@ class MessageDispatcher(object):
             logger.info('using aliases %s', settings.ALIASES)
             alias_regex = '|(?P<alias>{})'.format('|'.join([re.escape(s) for s in settings.ALIASES.split(',')]))
 
-        self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>{}):? (?P<text>.*)$'.format(alias_regex))
+        self.AT_MESSAGE_MATCHER = re.compile(r'^(?:\<@(?P<atuser>\w+)\>:?|(?P<username>\w+):{}) ?(?P<text>.*)$'.format(alias_regex))
 
     def start(self):
         self._pool.start()
@@ -78,10 +78,14 @@ class MessageDispatcher(object):
     def _get_bot_id(self):
         return self._client.login_data['self']['id']
 
+    def _get_bot_name(self):
+        return self._client.login_data['self']['name']
+
     def filter_text(self, msg):
         full_text = msg.get('text', '')
         channel = msg['channel']
-        bot_name = self._get_bot_id()
+        bot_name = self._get_bot_name()
+        bot_id = self._get_bot_id()
         m = self.AT_MESSAGE_MATCHER.match(full_text)
 
         if channel[0] == 'C' or channel[0] == 'G':
@@ -90,14 +94,15 @@ class MessageDispatcher(object):
 
             matches = m.groupdict()
 
-            atuser = matches.get('atuser', None)
-            text = matches.get('text', None)
-            alias = matches.get('alias', None)
+            atuser = matches.get('atuser')
+            username = matches.get('username')
+            text = matches.get('text')
+            alias = matches.get('alias')
 
             if alias:
-                atuser = bot_name
+                atuser = bot_id
 
-            if atuser != bot_name:
+            if atuser != bot_id and username != bot_name:
                 # a channel message at other user
                 return
 
