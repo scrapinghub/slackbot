@@ -5,9 +5,9 @@ import logging
 import re
 import time
 import traceback
-from functools import wraps
-
 import six
+from functools import wraps
+from slackbot import settings
 from slackbot.manager import PluginsManager
 from slackbot.utils import WorkerPool
 from slackbot import settings
@@ -16,10 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 class MessageDispatcher(object):
-    def __init__(self, slackclient, plugins):
+    def __init__(self, slackclient, plugins, default_reply=None):
         self._client = slackclient
         self._pool = WorkerPool(self.dispatch_msg)
         self._plugins = plugins
+        self._override_reply = default_reply
 
         alias_regex = ''
         if getattr(settings, 'ALIASES', None):
@@ -123,19 +124,26 @@ class MessageDispatcher(object):
             time.sleep(1)
 
     def _default_reply(self, msg):
-        try:
-            from slackbot_settings import default_reply
-        except ImportError:
-            default_reply = [
-                u'Bad command "{}", You can ask me one of the following questions:\n'.format(msg['text']),
-            ]
+
+        def _reply_or_run(message):
+            m = Message(self._client, msg)
+            if six.callable(message):
+                message(m)
+            else:
+                m.reply(message)
+
+        if self._override_reply:
+            _reply_or_run(self._override_reply)
+
+        elif hasattr(settings, 'default_reply'):
+            _reply_or_run(settings.default_reply)
+
+        else:
+            default_reply = [u'Bad command "{}", You can ask me one of the following questions:\n'.format(msg['text'])]
             default_reply += [u'    • `{0}` {1}'.format(p.pattern, v.__doc__ or "")
                               for p, v in six.iteritems(self._plugins.commands['respond_to'])]
-            # pylint: disable=redefined-variable-type
-            default_reply = u'\n'.join(default_reply)
+            _reply_or_run(u'\n'.join(default_reply))
 
-        m = Message(self._client, msg)
-        m.reply(default_reply)
 
 def unicode_compact(func):
     """

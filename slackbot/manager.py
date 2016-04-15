@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class PluginsManager(object):
-    def __init__(self):
-        pass
+    def __init__(self, plugins_path=None):
+        self.plugins_path = plugins_path
 
     commands = {
         'respond_to': {},
@@ -21,7 +21,9 @@ class PluginsManager(object):
     }
 
     def init_plugins(self):
-        if hasattr(settings, 'PLUGINS'):
+        if self.plugins_path:
+            plugins = self.plugins_path
+        elif hasattr(settings, 'PLUGINS'):
             plugins = settings.PLUGINS
         else:
             plugins = 'slackbot.plugins'
