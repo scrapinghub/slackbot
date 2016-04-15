@@ -1,9 +1,43 @@
 import pytest
 
+import slackbot.dispatcher
+
+
 TEST_ALIASES = ['!', '$', 'botbro']
 FAKE_BOT_ID = 'US99999'
 FAKE_BOT_ATNAME = '<@' + FAKE_BOT_ID + '>'
 FAKE_BOT_NAME = 'fakebot'
+FAKE_CHANNEL = 'C12942JF92'
+
+
+class FakePluginManager:
+    def raising(self, message):
+        raise RuntimeError
+
+    def okay(self, message):
+        message.reply('okay')
+
+    def get_plugins(self, category, message):
+        return [[getattr(self, message), []]]
+
+
+class FakeClient:
+    def __init__(self):
+        self.rtm_messages = []
+
+    def rtm_send_message(self, channel, message, attachments=None):
+        self.rtm_messages.append((channel, message))
+
+
+class FakeMessage:
+    def __init__(self, client, msg):
+        self._client = client
+        self._msg = msg
+
+    def reply(self, message):
+        # Perhaps a bit unnecessary to do it this way, but it's close to how
+        # dispatcher and message actually works
+        self._client.rtm_send_message(self._msg['channel'], message)
 
 
 @pytest.fixture()
@@ -13,13 +47,14 @@ def setup_aliases(monkeypatch):
 
 @pytest.fixture()
 def dispatcher(monkeypatch):
-    from slackbot.dispatcher import MessageDispatcher
-
     def return_fake_bot_id():
         return FAKE_BOT_ID
-    dispatcher = MessageDispatcher(None, None)
+
+    dispatcher = slackbot.dispatcher.MessageDispatcher(None, None, None)
     monkeypatch.setattr(dispatcher, '_get_bot_id', return_fake_bot_id)
     monkeypatch.setattr(dispatcher, '_get_bot_name', lambda: FAKE_BOT_NAME)
+    dispatcher._client = FakeClient()
+    dispatcher._plugins = FakePluginManager()
     return dispatcher
 
 
@@ -115,3 +150,33 @@ def test_direct_message_with_name(dispatcher):
 
     msg = dispatcher.filter_text(msg)
     assert msg['text'] == 'hello'
+
+
+def test_dispatch_msg(dispatcher, monkeypatch):
+    monkeypatch.setattr('slackbot.dispatcher.Message', FakeMessage)
+    dispatcher.dispatch_msg(
+        ['reply_to', {'text': 'okay', 'channel': FAKE_CHANNEL}])
+    assert dispatcher._client.rtm_messages == [(FAKE_CHANNEL, 'okay')]
+
+
+def test_dispatch_msg_exception(dispatcher, monkeypatch):
+    monkeypatch.setattr('slackbot.dispatcher.Message', FakeMessage)
+    dispatcher.dispatch_msg(
+        ['reply_to', {'text': 'raising', 'channel': FAKE_CHANNEL}])
+    assert len(dispatcher._client.rtm_messages) == 1
+    error = dispatcher._client.rtm_messages[0]
+    assert error[0] == FAKE_CHANNEL
+    assert 'RuntimeError' in error[1]
+
+
+def test_dispatch_msg_errors_to(dispatcher, monkeypatch):
+    monkeypatch.setattr('slackbot.dispatcher.Message', FakeMessage)
+    dispatcher._errors_to = 'D12345'
+    dispatcher.dispatch_msg(
+        ['reply_to', {'text': 'raising', 'channel': FAKE_CHANNEL}])
+    assert len(dispatcher._client.rtm_messages) == 2
+    user_error = dispatcher._client.rtm_messages[0]
+    assert user_error[0] == FAKE_CHANNEL
+    error = dispatcher._client.rtm_messages[1]
+    assert error[0] == 'D12345'
+    assert 'RuntimeError' in error[1]

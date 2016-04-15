@@ -19,11 +19,14 @@ class Bot(object):
     def __init__(self):
         self._client = SlackClient(
             settings.API_TOKEN,
-            bot_icon=settings.BOT_ICON if hasattr(settings, 'BOT_ICON') else None,
-            bot_emoji=settings.BOT_EMOJI if hasattr(settings, 'BOT_EMOJI') else None
+            bot_icon=settings.BOT_ICON if hasattr(settings,
+                                                  'BOT_ICON') else None,
+            bot_emoji=settings.BOT_EMOJI if hasattr(settings,
+                                                    'BOT_EMOJI') else None
         )
         self._plugins = PluginsManager()
-        self._dispatcher = MessageDispatcher(self._client, self._plugins)
+        self._dispatcher = MessageDispatcher(self._client, self._plugins,
+                                             settings.ERRORS_TO)
 
     def run(self):
         self._plugins.init_plugins()
@@ -42,15 +45,21 @@ class Bot(object):
 
 def respond_to(matchstr, flags=0):
     def wrapper(func):
-        PluginsManager.commands['respond_to'][re.compile(matchstr, flags)] = func
-        logger.info('registered respond_to plugin "%s" to "%s"', func.__name__, matchstr)
+        PluginsManager.commands['respond_to'][
+            re.compile(matchstr, flags)] = func
+        logger.info('registered respond_to plugin "%s" to "%s"', func.__name__,
+                    matchstr)
         return func
+
     return wrapper
 
 
 def listen_to(matchstr, flags=0):
     def wrapper(func):
-        PluginsManager.commands['listen_to'][re.compile(matchstr, flags)] = func
-        logger.info('registered listen_to plugin "%s" to "%s"', func.__name__, matchstr)
+        PluginsManager.commands['listen_to'][
+            re.compile(matchstr, flags)] = func
+        logger.info('registered listen_to plugin "%s" to "%s"', func.__name__,
+                    matchstr)
         return func
+
     return wrapper

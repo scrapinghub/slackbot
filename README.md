@@ -63,6 +63,15 @@ default_reply = "Sorry but I didn't understood you"
 ##### Configure the docs answer
 The `message` attribute passed to [your custom plugins](#create-plugins) has an special function `message.docs_reply()` that will parse all the plugins available and return the Docs in each of them.
 
+##### Send all tracebacks directly to a channel, group, or user
+Set `ERRORS_TO` in `slackbot_settings.py` to the desired recipient. It can be any channel, group, or user. Note that the bot must already be in the channel. If a user is specified, ensure that they have sent at least one DM to the bot first.
+
+```python
+ERRORS_TO = 'some_channel'
+# or...
+ERRORS_TO = 'username'
+```
+
 ##### Configure the plugins
 Add [your plugin modules](#create-plugins) to a `PLUGINS` list in `slackbot_settings.py`:
 

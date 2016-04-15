@@ -124,6 +124,15 @@ class SlackClient(object):
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
 
+    def find_channel_by_name(self, channel_name):
+        for channel_id, channel in iteritems(self.channels):
+            try:
+                name = channel['name']
+            except KeyError:
+                name = self.users[channel['user']]['name']
+            if name == channel_name:
+                return channel_id
+
     def find_user_by_name(self, username):
         for userid, user in iteritems(self.users):
             if user['name'] == username:
