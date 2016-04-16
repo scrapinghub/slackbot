@@ -11,7 +11,16 @@ def hello_reply(message):
 
 @respond_to('^reply_webapi$')
 def hello_webapi(message):
-    message.reply_webapi('hello there!')
+    message.reply_webapi('hello there!', attachments=[{
+        'fallback': 'test attachment',
+        'fields': [
+            {
+                'title': 'test table field',
+                'value': 'test table value',
+                'short': True
+            }
+        ]
+    }])
 
 
 @respond_to('^reply_webapi_not_as_user$')
