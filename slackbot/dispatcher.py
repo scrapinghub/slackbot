@@ -201,7 +201,7 @@ class Message(object):
             return text
 
     @unicode_compact
-    def reply_webapi(self, text):
+    def reply_webapi(self, text, as_user=True):
         """
             Send a reply to the sender using Web API
 
@@ -209,10 +209,10 @@ class Message(object):
             when using a bot integration)
         """
         text = self.gen_reply(text)
-        self.send_webapi(text)
+        self.send_webapi(text, as_user=as_user)
 
     @unicode_compact
-    def send_webapi(self, text, attachments=None):
+    def send_webapi(self, text, attachments=None, as_user=True):
         """
             Send a reply using Web API
 
@@ -222,7 +222,8 @@ class Message(object):
         self._client.send_message(
             self._body['channel'],
             text,
-            attachments=attachments)
+            attachments=attachments,
+            as_user=as_user)
 
     @unicode_compact
     def reply(self, text):
