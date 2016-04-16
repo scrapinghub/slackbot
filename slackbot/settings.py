@@ -23,10 +23,12 @@ will now also respond to
 ALIASES = ''
 
 '''
-If you use Slack Web API to send messages (with send_webapi() or reply_webapi()),
-you can customize the bot logo by providing Icon or Emoji.
-If you use Slack RTM API to send messages (with send() or reply()),
-the used icon comes from bot settings and Icon or Emoji has no effect.
+If you use Slack Web API to send messages (with
+send_webapi(text, as_user=False) or reply_webapi(text, as_user=False)),
+you can customize the bot logo by providing Icon or Emoji. If you use Slack
+RTM API to send messages (with send() or reply()), or if as_user is True
+(default), the used icon comes from bot settings and Icon or Emoji has no
+effect.
 '''
 # BOT_ICON = 'http://lorempixel.com/64/64/abstract/7/'
 # BOT_EMOJI = ':godmode:'
