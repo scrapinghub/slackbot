@@ -57,7 +57,7 @@ if __name__ == "__main__":
 ##### Configure the default answer
 Add to `slackbot_settings.py` a default_reply:
 ```python
-default_reply = "Sorry but I didn't understood you" 
+default_reply = "Sorry but I didn't understand you" 
 ```
 
 ##### Configure the docs answer
