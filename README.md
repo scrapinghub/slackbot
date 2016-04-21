@@ -1,7 +1,7 @@
-[![PyPI](https://badge.fury.io/py/slackbot.svg)](https://pypi.python.org/pypi/slackbot) [![Build Status](https://secure.travis-ci.org/lins05/slackbot.svg?branch=master)](http://travis-ci.org/lins05/slackbot)
+[![PyPI](https://badge.fury.io/py/asyncbot.svg)](https://pypi.python.org/pypi/asyncbot) [![Build Status](https://secure.travis-ci.org/merqurio/asyncbot.svg?branch=master)](http://travis-ci.org/merqurio/asyncbot)
 
-A chat bot for [Slack](https://slack.com) inspired by [llimllib/limbo](https://github.com/llimllib/limbo) and [will](https://github.com/skoczen/will).
-A fork from [lins05/slackbot](https://github.com/lins05/slackbot)
+A chat bot for [Slack](https://slack.com) inspired by [llimllib/limbo](https://github.com/llimllib/limbo) and [will](https://github.com/skoczen/will).<br/>
+A fork from [lins05/slackbot](https://github.com/lins05/slackbot).
 
 ## Features
 
@@ -22,7 +22,7 @@ A fork from [lins05/slackbot](https://github.com/lins05/slackbot)
 
 
 ```
-sudo pip install slackbot
+sudo pip install asyncbot
 ```
 
 ## Usage
@@ -36,10 +36,10 @@ First you need to get the slack api token for your bot. You have two options:
 
 
 ### Configure the bot
-Make sure you have [installed](#installation) slackbot and then create a `run.py` with your own instance of slackbot. like this:
+Make sure you have [installed](#installation) asyncbot and then create a `run.py` with your own instance of asyncbot. like this:
 
 ```python
-from slackbot.bot import Bot
+from asyncbot.bot import Bot
 
 def main():
     bot = Bot(
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 ##### Run the bot
 Launch the file from your shell. We recommend to daemonize the process.
 ```shell
-python run.py
+python3 run.py
 ```
 
 ##### Default reply
@@ -78,7 +78,6 @@ Add [your plugin modules](#create-plugins) to the instantiation of your bot:
 Bot(
     "API_TOKEN",
     plugins = [
-        'slackbot.plugins',
         'mybot.plugins'
     ]
 )
@@ -89,7 +88,7 @@ Now you can talk to your bot in your slack client!
 ### [Attachment Support](https://api.slack.com/docs/attachments)
 
 ```python
-from slackbot.bot import respond_to
+from asyncbot.bot import respond_to
 import re
 import json
 
@@ -110,14 +109,14 @@ def github():
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
 
-To write a new plugin, simplely create a function decorated by `slackbot.bot.respond_to` or `slackbot.bot.listen_to`:
+To write a new plugin, simplely create a function decorated by `asyncbot.bot.respond_to` or `asyncbot.bot.listen_to`:
 
 - A function decorated with `respond_to` is called when a message matching the pattern is sent to the bot (direct message or @botname in a channel/group chat)
 - A function decorated with `listen_to` is called when a message matching the pattern is sent on a channel/group chat (not directly sent to the bot)
 
 ```python
-from slackbot.bot import respond_to
-from slackbot.bot import listen_to
+from asyncbot.bot import respond_to
+from asyncbot.bot import listen_to
 import re
 
 @respond_to('hi', re.IGNORECASE)
@@ -141,7 +140,7 @@ def help(message):
 
 To extract params from the message, you can use regular expression:
 ```python
-from slackbot.bot import respond_to
+from asyncbot.bot import respond_to
 
 @respond_to('Give me (.*)')
 def giveme(message, something):
@@ -151,7 +150,7 @@ def giveme(message, something):
 If you would like to have a command like 'stats' and 'stats start_date end_date', you can create reg ex like so:
 
 ```python
-from slackbot.bot import respond_to
+from asyncbot.bot import respond_to
 import re
 
 
@@ -171,7 +170,3 @@ my_bot = Bot(
     ]
 )
 ```
-
-## Discussion
-
-* :hash: #python-slackbot on [freenode](https://webchat.freenode.net/?channels=python-slackbot)
