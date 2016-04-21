@@ -22,7 +22,7 @@ A fork from [lins05/slackbot](https://github.com/lins05/slackbot).
 
 
 ```
-sudo pip install asyncbot
+pip install asyncbot
 ```
 
 ## Usage
@@ -88,12 +88,12 @@ Now you can talk to your bot in your slack client!
 ### [Attachment Support](https://api.slack.com/docs/attachments)
 
 ```python
-from asyncbot.bot import respond_to
+from asyncbot.bot import reply_to
 import re
 import json
 
 
-@respond_to('github', re.IGNORECASE)
+@reply_to('github', re.IGNORECASE)
 def github():
     attachments = [
     {
@@ -109,23 +109,23 @@ def github():
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
 
-To write a new plugin, simplely create a function decorated by `asyncbot.bot.respond_to` or `asyncbot.bot.listen_to`:
+To write a new plugin, simplely create a function decorated by `asyncbot.bot.reply_to` or `asyncbot.bot.listen_to`:
 
-- A function decorated with `respond_to` is called when a message matching the pattern is sent to the bot (direct message or @botname in a channel/group chat)
+- A function decorated with `reply_to` is called when a message matching the pattern is sent to the bot (direct message or @botname in a channel/group chat)
 - A function decorated with `listen_to` is called when a message matching the pattern is sent on a channel/group chat (not directly sent to the bot)
 
 ```python
-from asyncbot.bot import respond_to
+from asyncbot.bot import reply_to
 from asyncbot.bot import listen_to
 import re
 
-@respond_to('hi', re.IGNORECASE)
+@reply_to('hi', re.IGNORECASE)
 def hi(message):
     message.reply('I can understand hi or HI!')
     # react with thumb up emoji
     message.react('+1')
 
-@respond_to('I love you')
+@reply_to('I love you')
 def love(message):
     message.reply('I love you too!')
 
@@ -140,9 +140,9 @@ def help(message):
 
 To extract params from the message, you can use regular expression:
 ```python
-from asyncbot.bot import respond_to
+from asyncbot.bot import reply_to
 
-@respond_to('Give me (.*)')
+@reply_to('Give me (.*)')
 def giveme(message, something):
     message.reply('Here is {}'.format(something))
 ```
@@ -150,12 +150,12 @@ def giveme(message, something):
 If you would like to have a command like 'stats' and 'stats start_date end_date', you can create reg ex like so:
 
 ```python
-from asyncbot.bot import respond_to
+from asyncbot.bot import reply_to
 import re
 
 
-@respond_to('stat$', re.IGNORECASE)
-@respond_to('stat (.*) (.*)', re.IGNORECASE)
+@reply_to('stat$', re.IGNORECASE)
+@reply_to('stat (.*) (.*)', re.IGNORECASE)
 def stats(message, start_date=None, end_date=None):
 ```
 

@@ -47,8 +47,7 @@ class Bot(object):
             self._client.ping()
 
 
-
-def respond_to(matchstr, flags=0):
+def reply_to(matchstr, flags=0):
     def wrapper(func):
         PluginsManager.commands['respond_to'][re.compile(matchstr, flags)] = func
         logger.info('registered respond_to plugin "%s" to "%s"', func.__name__, matchstr)

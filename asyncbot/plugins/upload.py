@@ -1,9 +1,9 @@
 import os
-from asyncbot.bot import respond_to
+from asyncbot.bot import reply_to
 from asyncbot.utils import download_file, create_tmp_file
 
 
-@respond_to(r'upload \<?(.*)\>?')
+@reply_to(r'upload \<?(.*)\>?')
 def upload(message, url):
     url = url.lstrip('<').rstrip('>')
     fname = os.path.basename(url)
