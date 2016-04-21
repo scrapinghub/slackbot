@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import re
 import sys
 import time
 import logging
 from six.moves import _thread
-from slackbot import settings
-from slackbot.manager import PluginsManager
-from slackbot.slackclient import SlackClient
-from slackbot.dispatcher import MessageDispatcher
+from asyncbot import settings
+from asyncbot.manager import PluginsManager
+from asyncbot.slackclient import SlackClient
+from asyncbot.dispatcher import MessageDispatcher
 
 logger = logging.getLogger(__name__)
 

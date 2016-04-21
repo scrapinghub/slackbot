@@ -1,7 +1,6 @@
 sudo: false
 language: python
 python:
-  - 2.7
   - 3.4
   - 3.5
 cache:
@@ -20,9 +19,9 @@ script: py.test -s -vv
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: lins05
+  user: merqurio
   password:
     secure: "diOVQyr+9Mr3UNSYqFkFLWs2+4+Rfp64x98Pt7FlWugO9TAoPOQSXoYCs71pszjkY7XNuo5mrbOvO6d8K6uAzQEYs/w+VXzxFcp2Cf/9oocvhQGU42M2r3Pwi89GMa1JcF81bUP+0OucAPCSOGeqyzemGKueb7fmin8PQwTE+5w="
   on:
     tags: true
-    repo: lins05/slackbot
+    repo: merqurio/asyncbot

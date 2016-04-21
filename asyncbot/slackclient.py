@@ -12,7 +12,7 @@ from websocket import (
     create_connection, WebSocketException, WebSocketConnectionClosedException
 )
 
-from slackbot.utils import to_utf8
+from asyncbot.utils import to_utf8
 
 logger = logging.getLogger(__name__)
 

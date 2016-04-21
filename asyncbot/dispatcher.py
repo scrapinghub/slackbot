@@ -7,9 +7,9 @@ import time
 import traceback
 import six
 from functools import wraps
-from slackbot import settings
-from slackbot.manager import PluginsManager
-from slackbot.utils import WorkerPool
+from asyncbot import settings
+from asyncbot.manager import PluginsManager
+from asyncbot.utils import WorkerPool
 
 logger = logging.getLogger(__name__)
 
