@@ -63,3 +63,14 @@ def listen_to(matchstr, flags=0):
         return func
 
     return wrapper
+
+
+def default_reply(matchstr=r'^.*$', flags=0):
+    def wrapper(func):
+        PluginsManager.commands['default_reply'][
+            re.compile(matchstr, flags)] = func
+        logger.info('registered default_reply plugin "%s" to "%s"', func.__name__,
+                    matchstr)
+        return func
+
+    return wrapper

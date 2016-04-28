@@ -41,9 +41,14 @@ class MessageDispatcher(object):
     def dispatch_msg(self, msg):
         category = msg[0]
         msg = msg[1]
-        text = msg['text']
+        if not self._dispatch_msg_handler(category, msg):
+            if category == u'respond_to':
+                if not self._dispatch_msg_handler('default_reply', msg):
+                    self._default_reply(msg)
+
+    def _dispatch_msg_handler(self, category, msg):
         responded = False
-        for func, args in self._plugins.get_plugins(category, text):
+        for func, args in self._plugins.get_plugins(category, msg['text']):
             if func:
                 responded = True
                 try:
@@ -51,9 +56,9 @@ class MessageDispatcher(object):
                 except:
                     logger.exception(
                         'failed to handle message %s with plugin "%s"',
-                        text, func.__name__)
+                        msg['text'], func.__name__)
                     reply = u'[{}] I had a problem handling "{}"\n'.format(
-                        func.__name__, text)
+                        func.__name__, msg['text'])
                     tb = u'```\n{}\n```'.format(traceback.format_exc())
                     if self._errors_to:
                         self._client.rtm_send_message(msg['channel'], reply)
@@ -64,9 +69,7 @@ class MessageDispatcher(object):
                         self._client.rtm_send_message(msg['channel'],
                                                       '{}\n{}'.format(reply,
                                                                       tb))
-
-        if not responded and category == u'respond_to':
-            self._default_reply(msg)
+        return responded
 
     def _on_new_message(self, msg):
         # ignore edits
