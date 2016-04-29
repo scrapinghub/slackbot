@@ -47,11 +47,8 @@ def setup_aliases(monkeypatch):
 
 @pytest.fixture()
 def dispatcher(monkeypatch):
-    def return_fake_bot_id():
-        return FAKE_BOT_ID
-
     dispatcher = slackbot.dispatcher.MessageDispatcher(None, None, None)
-    monkeypatch.setattr(dispatcher, '_get_bot_id', return_fake_bot_id)
+    monkeypatch.setattr(dispatcher, '_get_bot_id', lambda: FAKE_BOT_ID)
     monkeypatch.setattr(dispatcher, '_get_bot_name', lambda: FAKE_BOT_NAME)
     dispatcher._client = FakeClient()
     dispatcher._plugins = FakePluginManager()
