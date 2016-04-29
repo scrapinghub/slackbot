@@ -141,9 +141,8 @@ class MessageDispatcher(object):
             time.sleep(1)
 
     def _default_reply(self, msg):
-        try:
-            from slackbot_settings import default_reply
-        except ImportError:
+        default_reply = settings.DEFAULT_REPLY
+        if default_reply is None:
             default_reply = [
                 u'Bad command "{}", You can ask me one of the following '
                 u'questions:\n'.format(
