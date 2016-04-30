@@ -1,12 +1,10 @@
 sudo: false
 language: python
-python:
-  - 2.7
-  - 3.4
-  - 3.5
+python: 3.5
 cache:
   directories:
     - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/.tox
 before_install:
   - mkdir -p $HOME/opt/local/bin
   - export PATH=$HOME/opt/local/bin:$PATH
@@ -15,8 +13,8 @@ before_install:
   - cp scripts/slackbot-test-ctl $HOME/opt/local/bin
   - slackbot-test-ctl init
   - slackbot-test-ctl startproxy
-install: pip install -r requirements.txt
-script: py.test -s -vv
+install: pip install tox
+script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel

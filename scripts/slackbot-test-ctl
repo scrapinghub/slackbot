@@ -49,7 +49,7 @@ main() {
       pkill -f "ssserver -c $ssconfig"
       ;;
     run)
-       proxychains4 -f $proxychainsconfig "$@"
+       exec proxychains4 -f $proxychainsconfig "$@"
       ;;
     *)
       echo "WARNING: unknown command $action"

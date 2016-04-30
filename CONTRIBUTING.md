@@ -93,6 +93,8 @@ $ py.test
 
 If you're signed into slack, you'll see your user account and bot account chatting with each other as the tests run.
 
+Tox is also available. If your system has Python 2.7, 3.4, and 3.5 installed, installing and running tox will automatically manage the virtual Python environments and dependencies for you.
+
 ### Configure Travis
 
 Log in to Travis and enable tests for your slackbot fork. Open Travis settings. You must add the following environment variables, which should correlate to settings in `slackbot_test_settings.py`:
