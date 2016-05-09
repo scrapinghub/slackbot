@@ -5,6 +5,8 @@ import os
 import json
 import logging
 import time
+from ssl import SSLWantReadError
+
 import slacker
 from six import iteritems
 
@@ -85,7 +87,10 @@ class SlackClient(object):
                     logger.warning('websocket exception: %s', e)
                 self.reconnect()
             except Exception as e:
-                logger.warning('Exception in websocket_safe_read: %s', e)
+                if isinstance(e, SSLWantReadError) and e.errno == 2:
+                    pass
+                else:
+                    logger.warning('Exception in websocket_safe_read: %s', e)
                 return data.rstrip()
 
     def rtm_read(self):
