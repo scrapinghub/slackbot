@@ -45,7 +45,7 @@ class SlackClient(object):
                 self.rtm_connect()
                 logger.warning('reconnected to slack rtm websocket')
                 return
-            except Exception, e:
+            except Exception as e:
                 logger.exception('failed to reconnect: %s', e)
                 time.sleep(5)
 
@@ -84,7 +84,7 @@ class SlackClient(object):
                 else:
                     logger.warning('websocket exception: %s', e)
                 self.reconnect()
-            except Exception, e:
+            except Exception as e:
                 logger.warning('Exception in websocket_safe_read: %s', e)
                 return data.rstrip()
 
