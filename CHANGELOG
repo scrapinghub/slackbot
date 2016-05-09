@@ -1,0 +1,19 @@
+Release Notes - Slackbot - Version 0.4.0
+--------------------------------------------
+This release contains the following new features:
+
+  * [#60] - Added support for aliases.
+
+  * [#67] Send tracebacks to a specified channel/group/user
+
+  * [#68] Respond to botname in addition to @botname
+
+  * [#71] Support importing individual plugin modules
+
+  * [#73] DEFAULT_REPLY can now be passed via environment variables.
+
+  * [#74] Update send_webapi to send as_user by default
+
+  * [#75] Support attachments in message.reply_webapi
+
+  * [#81] Improve reconnection logic to avoid getting 429 Too Many Request
