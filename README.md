@@ -188,7 +188,7 @@ def my_default_hanlder(messsage):
     message.reply('...')
 ```
 
-The above default handler would only handle the message which matches the specified pattern, and no other hanlder can handle it.
+The above default handler would only handle the messages which must (1) match the specified pattern and (2) can't be handled by any other registered hanlder.
 
 ## List of third party plugins
 
