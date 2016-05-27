@@ -17,8 +17,16 @@ class FakePluginManager:
     def okay(self, message):
         message.reply('okay')
 
+    def default_okay(self, message):
+        message.reply('default_okay')
+
     def get_plugins(self, category, message):
-        return [[getattr(self, message), []]]
+        if message == 'no_plugin_defined':
+            return [[None, None]]
+        if category == 'default_reply':
+            return [[getattr(self, 'default_'+message), []]]
+        else:
+            return [[getattr(self, message), []]]
 
 
 class FakeClient:
@@ -47,6 +55,7 @@ def setup_aliases(monkeypatch):
 
 @pytest.fixture()
 def dispatcher(monkeypatch):
+    monkeypatch.setattr('slackbot.settings.DEFAULT_REPLY', 'sorry')
     dispatcher = slackbot.dispatcher.MessageDispatcher(None, None, None)
     monkeypatch.setattr(dispatcher, '_get_bot_id', lambda: FAKE_BOT_ID)
     monkeypatch.setattr(dispatcher, '_get_bot_name', lambda: FAKE_BOT_NAME)
@@ -177,3 +186,17 @@ def test_dispatch_msg_errors_to(dispatcher, monkeypatch):
     error = dispatcher._client.rtm_messages[1]
     assert error[0] == 'D12345'
     assert 'RuntimeError' in error[1]
+
+
+def test_dispatch_default_msg(dispatcher, monkeypatch):
+     monkeypatch.setattr('slackbot.dispatcher.Message', FakeMessage)
+     dispatcher.dispatch_msg(
+         ['respond_to', {'text': 'no_plugin_defined', 'channel': FAKE_CHANNEL}])
+     assert dispatcher._client.rtm_messages == [(FAKE_CHANNEL, 'sorry')]
+
+
+def test_dispatch_default_msg_plugin(dispatcher, monkeypatch):
+    monkeypatch.setattr('slackbot.dispatcher.Message', FakeMessage)
+    dispatcher.dispatch_msg(
+        ['respond_to', {'text': 'default_okay', 'channel': FAKE_CHANNEL}])
+    assert dispatcher._client.rtm_messages == [(FAKE_CHANNEL, 'default_okay')]
