@@ -168,6 +168,28 @@ PLUGINS = [
 ]
 ```
 
-* List of third party plugins
+## The `@default_reply` decorator
+
+*added in slackbot 0.4.1*
+
+Besides specifying `DEFAULT_REPLY` in `slackbot_settings.py`, you can also decorate a function with the `@default_reply` decorator to make it the default reply handler, which is more handy.
+
+```python
+@default_reply
+def my_default_hanlder(messsage):
+    message.reply('...')
+```
+
+Here is another variant of the decorator:
+
+```python
+@default_reply(r'hello.*)')
+def my_default_hanlder(messsage):
+    message.reply('...')
+```
+
+The above default handler would only handle the message which matches the specified pattern, and no other hanlder can handle it.
+
+## List of third party plugins
 
 You can find a list of the available third party plugins on [this page](https://github.com/lins05/slackbot/wiki/Plugins).
