@@ -134,14 +134,13 @@ class MessageDispatcher(object):
                 msg['text'] = m.groupdict().get('text', None)
         return msg
 
-    def loop(self):
-        while True:
-            events = self._client.rtm_read()
-            for event in events:
-                if event.get('type') != 'message':
-                    continue
-                self._on_new_message(event)
-            time.sleep(1)
+    def handle_events(self):
+        events = self._client.rtm_read()
+        for event in events:
+            if event.get('type') != 'message':
+                continue
+            self._on_new_message(event)
+
 
     def _default_reply(self, msg):
         default_reply = settings.DEFAULT_REPLY
