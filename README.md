@@ -72,6 +72,15 @@ ERRORS_TO = 'some_channel'
 ERRORS_TO = 'username'
 ```
 
+##### Hide tracebacks
+
+If you are running a production environment and don't want your end-users to see tracebacks, add the following in `slackbot_settings.py` :
+
+```python
+HIDE_TRACEBACKS = True
+ERROR_MSG = "I had a problem with that command. Please try again or contact an administrator. "
+```
+
 ##### Configure the plugins
 Add [your plugin modules](#create-plugins) to a `PLUGINS` list in `slackbot_settings.py`:
 

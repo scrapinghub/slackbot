@@ -21,6 +21,9 @@ class MessageDispatcher(object):
         self._pool = WorkerPool(self.dispatch_msg)
         self._plugins = plugins
         self._errors_to = None
+        self._hide_tracebacks = getattr(settings, 'HIDE_TRACEBACKS', False)
+        self._error_msg = getattr(settings, 'ERROR_MSG', None)
+        
         if errors_to:
             self._errors_to = self._client.find_channel_by_name(errors_to)
             if not self._errors_to:
@@ -57,8 +60,11 @@ class MessageDispatcher(object):
                     logger.exception(
                         'failed to handle message %s with plugin "%s"',
                         msg['text'], func.__name__)
-                    reply = u'[{}] I had a problem handling "{}"\n'.format(
-                        func.__name__, msg['text'])
+                    if not self._hide_tracebacks and not self._error_msg and not self._errors_to:
+                        reply = u'[{}] I had a problem handling "{}"\n'.format(
+                            func.__name__, msg['text'])
+                    else:
+                        reply = self._error_msg
                     tb = u'```\n{}\n```'.format(traceback.format_exc())
                     if self._errors_to:
                         self._client.rtm_send_message(msg['channel'], reply)
