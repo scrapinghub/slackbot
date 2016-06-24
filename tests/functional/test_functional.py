@@ -53,6 +53,14 @@ def driver():
 def clear_events(driver):
     driver.clear_events()
 
+
+def skip_if_no_test_group(f):
+    """Mark the test as skipped if no test_group is set."""
+    if test_group:
+        return f
+    return pytest.mark.skip(f)
+
+
 def test_bot_get_online(driver): # pylint: disable=W0613
     pass
 
@@ -118,6 +126,8 @@ def test_bot_channel_reply_to_name_colon(driver):
                                 space=False)
     driver.wait_for_bot_channel_message('hello channel!', tosender=False)
 
+
+@skip_if_no_test_group
 def test_bot_group_reply_to_name_colon(driver):
     driver.send_group_message('hello', tobot=False, toname=True)
     driver.wait_for_bot_group_message('hello sender!')
@@ -129,6 +139,7 @@ def test_bot_group_reply_to_name_colon(driver):
                                 space=False)
     driver.wait_for_bot_group_message('hello channel!', tosender=False)
 
+
 def test_bot_listen_to_channel_message(driver):
     driver.send_channel_message('hello', tobot=False)
     driver.wait_for_bot_channel_message('hello channel!', tosender=False)
@@ -137,11 +148,14 @@ def test_bot_react_to_channel_message(driver):
     driver.send_channel_message('hey!', tobot=False)
     driver.ensure_reaction_posted('eggplant')
 
+
+@skip_if_no_test_group
 def test_bot_reply_to_group_message(driver):
     driver.send_group_message('hello')
     driver.wait_for_bot_group_message('hello sender!')
     driver.send_group_message('hello', colon=False)
     driver.wait_for_bot_group_message('hello sender!')
+
 
 def test_bot_ignores_non_related_message_response_tosender(driver):
     driver.send_channel_message('hello', tobot=True)
