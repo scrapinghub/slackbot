@@ -8,7 +8,9 @@ the tests agains the bot.
 import os
 from os.path import join, abspath, dirname, basename
 import subprocess
+
 import pytest
+
 from tests.functional.driver import Driver
 from tests.functional.slackbot_settings import (
     testbot_apitoken, testbot_username,
@@ -192,3 +194,45 @@ def test_bot_reply_with_alias_message(driver):
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
     driver.send_channel_message('!hello', tobot=False, colon=False)
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
+
+
+def make_idle_func(use_rtm):
+    def idle_func_bored(client):
+        if use_rtm:
+            client.rtm_send_message(test_channel, "I am bored")
+        else:
+            client.send_message(test_channel, "I am bored")
+    return idle_func_bored
+
+
+# 5 tests, defined in hello.py
+# parametrize based on method for fewer test functions
+send_methods = {
+    'direct': {
+        'send': lambda driver, msg: driver.send_direct_message(msg),
+        'wait': lambda driver, msg: driver.wait_for_bot_direct_message(msg),
+    },
+    'channel': {
+        'send': lambda driver, msg: driver.send_channel_message(msg),
+        'wait': lambda driver, msg: driver.wait_for_bot_channel_message(msg, tosender=False)
+    },
+    'group': {
+        'send': lambda driver, msg: driver.send_group_message(msg),
+        'wait': lambda driver, msg: driver.wait_for_bot_group_message(msg, tosender=False)
+    },
+}
+
+@pytest.mark.parametrize('which_test', [0, 1, 2, 3])
+@pytest.mark.parametrize('method', send_methods.keys())
+def test_idle_func_dm(driver, which_test, method):
+    send_methods[method]['send'](driver, "start idle test %d" % which_test)
+    send_methods[method]['wait'](driver, "I am bored %d" % which_test)
+
+
+@pytest.mark.parametrize('method', send_methods.keys())
+def test_idle_func_dm_multi(driver, method):
+    send_methods[method]['send'](driver, "start idle test 4")
+    send_methods[method]['wait'](driver, "idle_1 is bored")
+    send_methods[method]['wait'](driver, "idle_2 is bored")
+    send_methods[method]['wait'](driver, "idle_1 is bored")
+    send_methods[method]['wait'](driver, "idle_2 is bored")

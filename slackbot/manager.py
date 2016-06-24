@@ -18,8 +18,9 @@ class PluginsManager(object):
     commands = {
         'respond_to': {},
         'listen_to': {},
-        'default_reply': {}
+        'default_reply': {},
     }
+    idle_commands = []
 
     def init_plugins(self):
         if hasattr(settings, 'PLUGINS'):
@@ -72,3 +73,6 @@ class PluginsManager(object):
 
         if not has_matching_plugin:
             yield None, None
+
+    def get_idle_plugins(self):
+        yield from self.idle_commands

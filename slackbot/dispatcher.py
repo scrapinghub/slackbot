@@ -135,13 +135,43 @@ class MessageDispatcher(object):
         return msg
 
     def loop(self):
+        # once/second, check events
+        # run idle handlers whenever idle
         while True:
             events = self._client.rtm_read()
             for event in events:
                 if event.get('type') != 'message':
                     continue
                 self._on_new_message(event)
-            time.sleep(1)
+
+            # run idle handlers as long as we've been idle
+            for func in self._plugins.get_idle_plugins():
+                if not func:
+                    continue
+
+                # if actions are pending, don't do anything
+                if not self._pool.queue.empty():
+                    break
+
+                # if some action was taken, don't run the remaining handlers
+                if self._client.idle_time() < 1:
+                    break
+
+                try:
+                    func(self._client)
+                except:
+                    logger.exception(
+                        'idle handler failed with plugin "%s"',
+                        func.__name__)
+                    reply = u'[{}] I had a problem with idle handler\n'.format(
+                        func.__name__)
+                    tb = u'```\n{}\n```'.format(traceback.format_exc())
+                    # no channel, so only send errors to error user
+                    if self._errors_to:
+                        self._client.rtm_send_message(self._errors_to,
+                                                      '{}\n{}'.format(reply,
+                                                                      tb))
+            time.sleep(1.0)
 
     def _default_reply(self, msg):
         default_reply = settings.DEFAULT_REPLY
