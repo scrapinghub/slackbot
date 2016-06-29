@@ -265,6 +265,10 @@ class Message(object):
     def body(self):
         return self._body
 
+    @property
+    def user(self):
+        return self._client.get_user(self._body['user'])
+
     def docs_reply(self):
         reply = [u'    • `{0}` {1}'.format(v.__name__, v.__doc__ or '')
                  for _, v in
