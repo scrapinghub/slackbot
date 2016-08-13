@@ -184,7 +184,7 @@ Here is another variant of the decorator:
 
 ```python
 @default_reply(r'hello.*)')
-def my_default_hanlder(messsage):
+def my_default_hanlder(message):
     message.reply('...')
 ```
 
