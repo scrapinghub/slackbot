@@ -160,6 +160,11 @@ class Channel(object):
         self._body = body
         self._client = slackclient
 
+    def __eq__(self, compare_str):
+        name = self._body['name']
+        cid = self._body['id']
+        return name == compare_str or "#" + name == compare_str or cid == compare_str
+
     def upload_file(self, fname, fpath, initial_comment=''):
         self._client.upload_file(
             self._body['id'],
