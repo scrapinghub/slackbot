@@ -60,11 +60,14 @@ class SlackClient(object):
         self.parse_channel_data(login_data['groups'])
         self.parse_channel_data(login_data['ims'])
 
-        try:
+        proxy, proxy_port, no_proxy = None, None, None
+        if 'http_proxy' in os.environ:
             proxy, proxy_port = os.environ['http_proxy'].split(':')
-            self.websocket = create_connection(self.login_data['url'], http_proxy_host=proxy, http_proxy_port=proxy_port)
-        except KeyError:
-            self.websocket = create_connection(self.login_data['url'], http_proxy_host=proxy, http_proxy_port=proxy_port)
+        if 'no_proxy' in os.environ:
+            no_proxy = os.environ['no_proxy']
+
+        self.websocket = create_connection(self.login_data['url'], http_proxy_host=proxy,
+                                           http_proxy_port=proxy_port, http_no_proxy=no_proxy)
 
         self.websocket.sock.setblocking(0)
 
