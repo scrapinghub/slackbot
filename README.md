@@ -15,7 +15,7 @@ A chat bot for [Slack](https://slack.com) inspired by [llimllib/limbo](https://g
 
 
 ```
-sudo pip install slackbot
+pip install slackbot
 ```
 
 ## Usage
@@ -184,7 +184,7 @@ Here is another variant of the decorator:
 
 ```python
 @default_reply(r'hello.*)')
-def my_default_hanlder(messsage):
+def my_default_hanlder(message):
     message.reply('...')
 ```
 
