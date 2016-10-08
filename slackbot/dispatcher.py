@@ -138,9 +138,17 @@ class MessageDispatcher(object):
         while True:
             events = self._client.rtm_read()
             for event in events:
-                if event.get('type') != 'message':
+                if event['type'] == 'message':
+                    self._on_new_message(event)
+                elif event['type'] in ['channel_created', 'group_joined', 'im_created']:
+                    channel = [event['channel']]
+                    self._client.parse_channel_data(channel)
+                elif event['type'] == 'team_join':
+                    user = event['user']
+                    self._client.users[user['id']] = user
+                else:
                     continue
-                self._on_new_message(event)
+
             time.sleep(1)
 
     def _default_reply(self, msg):
