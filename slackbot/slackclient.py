@@ -135,6 +135,11 @@ class SlackClient(object):
                 attachments=attachments,
                 as_user=as_user)
 
+   def send_me_message(self, channel, message):
+        self.webapi.chat.me_message(
+                channel,
+                message)
+
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
 
