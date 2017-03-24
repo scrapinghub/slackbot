@@ -103,7 +103,7 @@ class MessageDispatcher(object):
         return self._client.login_data['self']['name']
 
     def filter_text(self, msg):
-        full_text = msg.get('text', '')
+        full_text = msg.get('text', '') or ''
         channel = msg['channel']
         bot_name = self._get_bot_name()
         bot_id = self._get_bot_id()
