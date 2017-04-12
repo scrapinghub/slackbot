@@ -22,10 +22,10 @@ def test_kwargs():
     pm._load_plugins('kwarg_plugin_module')
 
     msg = {
-        'category': 'default_reply',
+        'category': 'respond_to',
         'text': 'Hello, Jeong Arm',
     }
 
-    func, args, kwargs = pm.get_plugins(msg['category'], msg['text'])
-    assert args == ()
+    func, args, kwargs = next(pm.get_plugins(msg['category'], msg['text']))
+    assert not args
     assert kwargs == {'name': 'Jeong Arm'}
