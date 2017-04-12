@@ -68,13 +68,13 @@ class PluginsManager(object):
             m = matcher.search(text)
             if m:
                 kwargs = m.groupdict()
-                args = (
+                args = tuple(
                     m.group(i)
-                    for i in range(1, m.last_index + 1)
+                    for i in range(1, m.lastindex + 1)
                     if i not in matcher.groupindex.values()
                 )
                 has_matching_plugin = True
                 yield self.commands[category][matcher], to_utf8(args), to_utf8(kwargs)
 
         if not has_matching_plugin:
-            yield None, None
+            yield None, None, None
