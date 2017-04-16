@@ -93,7 +93,7 @@ import json
 
 
 @respond_to('github', re.IGNORECASE)
-def github():
+def github(message):
     attachments = [
     {
         'fallback': 'Fallback text',
