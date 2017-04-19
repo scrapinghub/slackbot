@@ -30,8 +30,12 @@ class SlackClient(object):
         self.websocket = None
         self.users = {}
         self.channels = {}
+        self.dm_channels = {}  # map user id to direct message channel id
         self.connected = False
         self.webapi = slacker.Slacker(self.token)
+
+        # keep track of last action for idle handling
+        self._last_action = time.time()
 
         if connect:
             self.rtm_connect()
@@ -73,14 +77,22 @@ class SlackClient(object):
 
     def parse_channel_data(self, channel_data):
         self.channels.update({c['id']: c for c in channel_data})
+        # pre-load direct message channels
+        for c in channel_data:
+            if 'user' in c:
+                self.dm_channels[c['user']] = c['id']
 
     def send_to_websocket(self, data):
-        """Send (data) directly to the websocket."""
+        """Send (data) directly to the websocket.
+
+        Update last action for idle handling."""
         data = json.dumps(data)
         self.websocket.send(data)
+        self._last_action = time.time()
 
     def ping(self):
-        return self.send_to_websocket({'type': 'ping'})
+        self.send_to_websocket({'type': 'ping'})
+        self._last_action = time.time()
 
     def websocket_safe_read(self):
         """Returns data if available, otherwise ''. Newlines indicate multiple messages """
@@ -109,7 +121,8 @@ class SlackClient(object):
                 data.append(json.loads(d))
         return data
 
-    def rtm_send_message(self, channel, message, attachments=None):
+    def rtm_send_message(self, channelish, message, attachments=None):
+        channel = self._channelify(channelish)
         message_json = {
             'type': 'message',
             'channel': channel,
@@ -118,14 +131,17 @@ class SlackClient(object):
             }
         self.send_to_websocket(message_json)
 
-    def upload_file(self, channel, fname, fpath, comment):
+    def upload_file(self, channelish, fname, fpath, comment):
+        channel = self._channelify(channelish)
         fname = fname or to_utf8(os.path.basename(fpath))
         self.webapi.files.upload(fpath,
                                  channels=channel,
                                  filename=fname,
                                  initial_comment=comment)
+        self._last_action = time.time()
 
-    def send_message(self, channel, message, attachments=None, as_user=True):
+    def send_message(self, channelish, message, attachments=None, as_user=True):
+        channel = self._channelify(channelish)
         self.webapi.chat.post_message(
                 channel,
                 message,
@@ -134,9 +150,56 @@ class SlackClient(object):
                 icon_emoji=self.bot_emoji,
                 attachments=attachments,
                 as_user=as_user)
+        self._last_action = time.time()
 
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
+
+    def get_dm_channel(self, user_id):
+        """Get the direct message channel for the given user id, opening
+        one if necessary."""
+        if user_id not in self.users:
+            raise ValueError("Expected valid user_id, have no user '%s'" % (
+                user_id,))
+
+        if user_id in self.dm_channels:
+            return self.dm_channels[user_id]
+
+        # open a new channel
+        resp = self.webapi.im.open(user_id)
+        if not resp.body["ok"]:
+            raise ValueError("Could not open DM channel: %s" % resp.body)
+
+        self.dm_channels[user_id] = resp.body['channel']['id']
+
+        return self.dm_channels[user_id]
+
+    def _channelify(self, s):
+        """Turn a string into a channel.
+
+        * Given a channel id, return that same channel id.
+        * Given a channel name, return the channel id.
+        * Given a user id, return the direct message channel with that user,
+        opening a new one if necessary.
+        * Given a user name, do the same as for a user id.
+
+        Raise a ValueError otherwise."""
+        if s in self.channels:
+            return s
+
+        channel_id = self.find_channel_by_name(s)
+        if channel_id:
+            return channel_id
+
+        if s in self.users:
+            return self.get_dm_channel(s)
+
+        user_id = self.find_user_by_name(s)
+        if user_id:
+            return self.get_dm_channel(user_id)
+
+        raise ValueError("Could not turn '%s' into any kind of channel name" % (
+            user_id))
 
     def find_channel_by_name(self, channel_name):
         for channel_id, channel in iteritems(self.channels):
@@ -157,6 +220,12 @@ class SlackClient(object):
             name=emojiname,
             channel=channel,
             timestamp=timestamp)
+        self._last_action = time.time()
+
+    def idle_time(self):
+        """Return the time the client has been idle, i.e. the time since
+        it sent the last message to the server."""
+        return time.time() - self._last_action
 
 
 class SlackConnectionError(Exception):

@@ -76,3 +76,20 @@ class WorkerPool(object):
         while True:
             msg = self.queue.get()
             self.func(msg)
+
+
+def optional_arg_decorator(fn):
+    """Allows for easier making of decorators with optional arguments.
+
+    See: http://stackoverflow.com/questions/3888158/python-making-decorators-with-optional-arguments"""
+    def wrapped_decorator(*args):
+        if len(args) == 1 and callable(args[0]):
+            return fn(args[0])
+
+        else:
+            def real_decorator(decoratee):
+                return fn(decoratee, *args)
+
+            return real_decorator
+
+    return wrapped_decorator
