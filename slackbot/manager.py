@@ -70,7 +70,7 @@ class PluginsManager(object):
                 kwargs = m.groupdict()
                 args = tuple(
                     m.group(i)
-                    for i in range(1, m.lastindex + 1)
+                    for i in range(1, (m.lastindex or 0) + 1)
                     if i not in matcher.groupindex.values()
                 )
                 has_matching_plugin = True
