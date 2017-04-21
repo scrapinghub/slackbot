@@ -223,7 +223,8 @@ class Driver(object):
     def _has_uploaded_file_rtm(self, name):
         with self._events_lock:
             for event in self.events:
-                if event['type'] == 'file_shared' \
+                if event['type'] == 'message' \
+                   and event.get('subtype') == 'file_share' \
                    and event['file']['name'] == name \
                    and event['file']['user'] == self.testbot_userid:
                     return True
