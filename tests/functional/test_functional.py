@@ -26,14 +26,15 @@ def start_proxy():
 def _start_bot_process():
     args = [
         'python',
-        'run.py',
+        'tests/functional/run.py',
     ]
     if TRAVIS:
         args = ['slackbot-test-ctl', 'run'] + args
     env = dict(os.environ)
     env['SLACKBOT_API_TOKEN'] = testbot_apitoken
     env['SLACKBOT_TEST'] = 'true'
-    env['PYTHONPATH'] = ':'.join([dirname(abspath(__file__)), env.get('PYTHONPATH', '')])
+    env['PYTHONPATH'] = ':'.join(
+        [join(dirname(abspath(__file__))), '../..', env.get('PYTHONPATH', '')])
     return subprocess.Popen(args, env=env)
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101
