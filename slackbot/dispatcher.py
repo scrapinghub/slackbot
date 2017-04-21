@@ -138,12 +138,13 @@ class MessageDispatcher(object):
         while True:
             events = self._client.rtm_read()
             for event in events:
-                if event.get('type') == 'message':
+                event_type = event.get('type')
+                if event_type == 'message':
                     self._on_new_message(event)
-                elif event.get('type') in ['channel_created', 'group_joined', 'im_created']:
+                elif event_type in ['channel_created', 'group_joined', 'im_created']:
                     channel = [event['channel']]
                     self._client.parse_channel_data(channel)
-                elif event.get('type') == 'team_join':
+                elif event_type == 'team_join':
                     user = event['user']
                     self._client.users[user['id']] = user
             time.sleep(1)
