@@ -37,6 +37,8 @@ class Driver(object):
         # self._fetch_users()
         self._start_dm_channel()
         self._join_test_channel()
+        if self.test_group:
+            self._join_test_group()
 
     def wait_for_bot_online(self):
         self._wait_for_bot_presense(True)
@@ -245,6 +247,7 @@ class Driver(object):
         self.cm_chan = response.body['channel']['id']
         self._invite_testbot_to_channel()
 
+    def _join_test_group(self):
         groups = self.slacker.groups.list(self.test_group).body['groups']
         for group in groups:
             if self.test_group == group['name']:
