@@ -64,6 +64,8 @@ class PluginsManager(object):
 
     def get_plugins(self, category, text):
         has_matching_plugin = False
+        if text is None:
+            text = ''
         for matcher in self.commands[category]:
             m = matcher.search(text)
             if m:
