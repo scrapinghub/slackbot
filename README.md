@@ -176,7 +176,7 @@ Besides specifying `DEFAULT_REPLY` in `slackbot_settings.py`, you can also decor
 
 ```python
 @default_reply
-def my_default_hanlder(messsage):
+def my_default_handler(messsage):
     message.reply('...')
 ```
 
@@ -184,7 +184,7 @@ Here is another variant of the decorator:
 
 ```python
 @default_reply(r'hello.*)')
-def my_default_hanlder(messsage):
+def my_default_handler(messsage):
     message.reply('...')
 ```
 
