@@ -11,9 +11,10 @@ import six
 logger = logging.getLogger(__name__)
 
 
-def download_file(url, fpath):
+def download_file(url, fpath, token=''):
     logger.debug('starting to fetch %s', url)
-    r = requests.get(url, stream=True)
+    headers = {"Authorization": "Bearer "+token} if token else None
+    r = requests.get(url, stream=True, headers=headers)
     with open(fpath, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024*64):
             if chunk:  # filter out keep-alive new chunks
