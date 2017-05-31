@@ -26,14 +26,15 @@ def start_proxy():
 def _start_bot_process():
     args = [
         'python',
-        'run.py',
+        'tests/functional/run.py',
     ]
     if TRAVIS:
         args = ['slackbot-test-ctl', 'run'] + args
     env = dict(os.environ)
     env['SLACKBOT_API_TOKEN'] = testbot_apitoken
     env['SLACKBOT_TEST'] = 'true'
-    env['PYTHONPATH'] = ':'.join([dirname(abspath(__file__)), env.get('PYTHONPATH', '')])
+    env['PYTHONPATH'] = ':'.join(
+        [join(dirname(abspath(__file__))), '../..', env.get('PYTHONPATH', '')])
     return subprocess.Popen(args, env=env)
 
 @pytest.yield_fixture(scope='module') # pylint: disable=E1101
@@ -82,19 +83,17 @@ def test_bot_default_reply(driver):
     driver.send_direct_message('youdontunderstandthiscommand do you')
     driver.wait_for_bot_direct_message('.*You can ask me.*')
 
-@pytest.mark.skip
 def test_bot_upload_file(driver):
-    png = join(abspath(dirname(__file__)), 'slack.png')
-    driver.send_direct_message('upload %s' % png)
+    driver.send_direct_message('upload slack.png')
     driver.wait_for_bot_direct_message('uploading slack.png')
     driver.wait_for_file_uploaded('slack.png')
 
-@pytest.mark.skip
 def test_bot_upload_file_from_link(driver):
     url = 'https://slack.com/favicon.ico'
     fname = basename(url)
     driver.send_direct_message('upload %s' % url)
-    driver.wait_for_bot_direct_message('uploading %s' % fname)
+    driver.wait_for_bot_direct_message('uploading <%s>' % url)
+    driver.wait_for_file_uploaded(fname)
 
 def test_bot_reply_to_channel_message(driver):
     driver.send_channel_message('hello')

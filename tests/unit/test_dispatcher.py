@@ -200,3 +200,14 @@ def test_dispatch_default_msg_plugin(dispatcher, monkeypatch):
     dispatcher.dispatch_msg(
         ['respond_to', {'text': 'default_okay', 'channel': FAKE_CHANNEL}])
     assert dispatcher._client.rtm_messages == [(FAKE_CHANNEL, 'default_okay')]
+
+
+def test_none_text(dispatcher):
+    # Test for #138: If new msg text is None, fallback to empty str
+    msg = {
+        'text': None,
+        'channel': 'C99999'
+    }
+    # Should not raise a TypeError
+    msg = dispatcher.filter_text(msg)
+    assert msg is None
