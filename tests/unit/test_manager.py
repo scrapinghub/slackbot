@@ -36,6 +36,7 @@ def test_get_plugins_none_text():
     p = PluginsManager()
     p.commands['respond_to'][re.compile(r'^dummy regexp$')] = lambda x: x
     # Calling get_plugins() with `text == None`
-    for func, args in p.get_plugins('respond_to', None):
+    for func, args, kwargs in p.get_plugins('respond_to', None):
         assert func is None
         assert args is None
+        assert kwargs is None
