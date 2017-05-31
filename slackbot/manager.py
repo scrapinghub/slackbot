@@ -71,12 +71,15 @@ class PluginsManager(object):
             if m:
                 kwargs = m.groupdict()
                 args = tuple(
-                    m.group(i)
-                    for i in range(1, (m.lastindex or 0) + 1)
-                    if i not in matcher.groupindex.values()
+                    v for i, v in enumerate(m.groups())
+                    if (i + 1) not in matcher.groupindex.values()
                 )
                 has_matching_plugin = True
-                yield self.commands[category][matcher], to_utf8(args), to_utf8(kwargs)
+                kwargs_utf8 = {
+                    to_utf8(k): to_utf8(v)
+                    for k, v in kwargs.items()
+                }
+                yield self.commands[category][matcher], to_utf8(args), kwargs_utf8
 
         if not has_matching_plugin:
             yield None, None, None
