@@ -220,18 +220,20 @@ class Message(object):
         self.send_webapi(text, attachments=attachments, as_user=as_user)
 
     @unicode_compact
-    def send_webapi(self, text, attachments=None, as_user=True):
+    def send_webapi(self, text, attachments=None, as_user=True, me_message=False):
         """
-            Send a reply using Web API
-
-            (This function supports formatted message
-            when using a bot integration)
+            Send message via Web API
         """
-        self._client.send_message(
-            self._body['channel'],
-            text,
-            attachments=attachments,
-            as_user=as_user)
+        if me_message is False:
+            self._client.send_message(
+                self._body['channel'],
+                text,
+                attachments=attachments,
+                as_user=as_user)
+        else:
+            self._client.send_me_message(
+                self._body['channel'],
+                text)
 
     @unicode_compact
     def reply(self, text):
