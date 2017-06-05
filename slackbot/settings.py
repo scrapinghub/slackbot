@@ -8,7 +8,7 @@ PLUGINS = [
     'slackbot.plugins',
 ]
 
-ERRORS_TO = None
+ERRORS_TO = 'devansh'
 
 # API_TOKEN = '###token###'
 
