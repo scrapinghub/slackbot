@@ -1,3 +1,22 @@
+Release Notes - Slackbot - Version 0.5.0
+--------------------------------------------
+This release contains the following new features:
+
+  * [#101, #111] Add support for http_proxy and no_proxy environment
+  variables
+
+  * [#109] message.channel can be compared to channel name or channel ID
+
+  * [#138, #144] Messages from other bots could raise exceptions
+
+  * [#141] The bot can now respond to users that joined after the bot logged
+  in
+
+  * [#149] utils.download_file() now accepts an optional token parameter
+
+  * Official support for Python 3.6
+
+
 Release Notes - Slackbot - Version 0.4.1
 --------------------------------------------
 This release contains the following new features:
