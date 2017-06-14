@@ -77,7 +77,7 @@ class MessageDispatcher(object):
         if subtype == u'message_changed':
             return
 
-        botname = self._client.login_data['self']['name']
+        botname = self._get_bot_name()
         try:
             msguser = self._client.users.get(msg['user'])
             username = msguser['name']
@@ -141,12 +141,14 @@ class MessageDispatcher(object):
                 event_type = event.get('type')
                 if event_type == 'message':
                     self._on_new_message(event)
-                elif event_type in ['channel_created', 'group_joined', 'im_created']:
+                elif event_type in ['channel_created', 'channel_rename',
+                                    'group_joined', 'group_rename',
+                                    'im_created']:
                     channel = [event['channel']]
                     self._client.parse_channel_data(channel)
-                elif event_type == 'team_join':
-                    user = event['user']
-                    self._client.users[user['id']] = user
+                elif event_type in ['team_join', 'user_change']:
+                    user = [event['user']]
+                    self._client.parse_user_data(user)
             time.sleep(1)
 
     def _default_reply(self, msg):

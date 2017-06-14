@@ -55,7 +55,7 @@ class SlackClient(object):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
-        self.users = dict((u['id'], u) for u in login_data['users'])
+        self.parse_user_data(login_data['users'])
         self.parse_channel_data(login_data['channels'])
         self.parse_channel_data(login_data['groups'])
         self.parse_channel_data(login_data['ims'])
@@ -73,6 +73,9 @@ class SlackClient(object):
 
     def parse_channel_data(self, channel_data):
         self.channels.update({c['id']: c for c in channel_data})
+
+    def parse_user_data(self, user_data):
+        self.users.update({u['id']: u for u in user_data})
 
     def send_to_websocket(self, data):
         """Send (data) directly to the websocket."""
