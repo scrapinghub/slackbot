@@ -191,3 +191,13 @@ def test_bot_reply_with_alias_message(driver):
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
     driver.send_channel_message('!hello', tobot=False, colon=False)
     driver.wait_for_bot_channel_message("hello sender!", tosender=True)
+
+
+def test_bot_reply_thread_in_channel(driver):
+    driver.send_channel_message('start a thread', tobot=False, colon=False)
+    driver.wait_for_bot_channel_thread_message('I started a thread', tosender=False)
+
+
+def test_bot_reply_thread_in_group(driver):
+    driver.send_group_message('start a thread', tobot=False, colon=False)
+    driver.wait_for_bot_group_thread_message('I started a thread', tosender=False)

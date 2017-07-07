@@ -91,6 +91,12 @@ class Driver(object):
     def wait_for_bot_group_message(self, match, tosender=True):
         self._wait_for_bot_message(self.gm_chan, match, tosender=tosender)
 
+    def wait_for_bot_channel_thread_message(self, match, tosender=False):
+        self._wait_for_bot_message(self.gm_chan, match, tosender=tosender, thread=True)
+
+    def wait_for_bot_group_thread_message(self, match, tosender=False):
+        self._wait_for_bot_message(self.gm_chan, match, tosender=tosender)
+
     def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
         if tosender is True:
             match = six.text_type(r'^\<@{}\>: {}$').format(self.driver_userid, match)
@@ -135,10 +141,10 @@ class Driver(object):
         self._start_ts = time.time()
         self.slacker.chat.post_message(channel, msg, username=self.driver_username)
 
-    def _wait_for_bot_message(self, channel, match, maxwait=60, tosender=True):
+    def _wait_for_bot_message(self, channel, match, maxwait=60, tosender=True, thread=False):
         for _ in range(maxwait):
             time.sleep(1)
-            if self._has_got_message_rtm(channel, match, tosender):
+            if self._has_got_message_rtm(channel, match, tosender, thread=thread):
                 break
         else:
             raise AssertionError('expected to get message like "{}", but got nothing'.format(match))
@@ -156,12 +162,13 @@ class Driver(object):
                 return True
         return False
 
-    def _has_got_message_rtm(self, channel, match, tosender=True):
+    def _has_got_message_rtm(self, channel, match, tosender=True, thread=False):
         if tosender is True:
             match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
-                if event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):
+                if (not thread or (thread and event.get('thread_ts', False))) \
+                        and event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):
                     return True
             return False
 
