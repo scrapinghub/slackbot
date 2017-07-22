@@ -14,6 +14,8 @@ This release contains the following new features:
 
   * [#149] utils.download_file() now accepts an optional token parameter
 
+  * [#136] Let slackbot add replies to a thread
+
   * Official support for Python 3.6
 
 

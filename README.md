@@ -134,7 +134,10 @@ def help(message):
     message.reply('Yes, I can!')
 
     # Message is sent on the channel
-    # message.send('I can help everybody!')
+    message.send('I can help everybody!')
+
+    # Start a thread on the original message
+    message.reply("Here's a threaded reply", in_thread=True)
 ```
 
 To extract params from the message, you can use regular expression:
