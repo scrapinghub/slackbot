@@ -40,6 +40,8 @@ class Driver(object):
 
     def wait_for_bot_online(self):
         self._wait_for_bot_presense(True)
+        # sleep to allow bot connection to stabilize
+        time.sleep(2)
 
     def wait_for_bot_offline(self):
         self._wait_for_bot_presense(False)
@@ -95,7 +97,8 @@ class Driver(object):
         self._wait_for_bot_message(self.gm_chan, match, tosender=tosender, thread=True)
 
     def wait_for_bot_group_thread_message(self, match, tosender=False):
-        self._wait_for_bot_message(self.gm_chan, match, tosender=tosender)
+        self._wait_for_bot_message(self.gm_chan, match, tosender=tosender,
+                                   thread=True)
 
     def ensure_only_specificmessage_from_bot(self, match, wait=5, tosender=False):
         if tosender is True:
@@ -167,6 +170,8 @@ class Driver(object):
             match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
+                if 'type' not in event or 'text' not in event:
+                    print('Unusual event received: ' + repr(event))
                 if (not thread or (thread and event.get('thread_ts', False))) \
                         and event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):
                     return True

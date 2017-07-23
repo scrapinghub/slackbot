@@ -16,6 +16,9 @@ This release contains the following new features:
 
   * [#136] Let slackbot add replies to a thread
 
+  * message.channel.upload_content() for uploading data without storing it in
+  a file first
+
   * Official support for Python 3.6
 
 

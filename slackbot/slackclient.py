@@ -129,6 +129,13 @@ class SlackClient(object):
                                  filename=fname,
                                  initial_comment=comment)
 
+    def upload_content(self, channel, fname, content, comment):
+        self.webapi.files.upload(None,
+                                 channels=channel,
+                                 content=content,
+                                 filename=fname,
+                                 initial_comment=comment)
+
     def send_message(self, channel, message, attachments=None, as_user=True, thread_ts=None):
         self.webapi.chat.post_message(
                 channel,
@@ -183,5 +190,13 @@ class Channel(object):
             self._body['id'],
             to_utf8(fname),
             to_utf8(fpath),
+            to_utf8(initial_comment)
+        )
+
+    def upload_content(self, fname, content, initial_comment=''):
+        self._client.upload_content(
+            self._body['id'],
+            to_utf8(fname),
+            to_utf8(content),
             to_utf8(initial_comment)
         )
