@@ -170,7 +170,8 @@ class Driver(object):
             match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         with self._events_lock:
             for event in self.events:
-                if 'type' not in event or 'text' not in event:
+                if 'type' not in event or \
+                        (event['type'] == 'message' and 'text' not in event):
                     print('Unusual event received: ' + repr(event))
                 if (not thread or (thread and event.get('thread_ts', False))) \
                         and event['type'] == 'message' and re.match(match, event['text'], re.DOTALL):

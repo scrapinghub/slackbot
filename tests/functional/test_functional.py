@@ -101,7 +101,7 @@ def test_bot_upload_file(driver):
 def test_bot_upload_file_from_link(driver):
     url = 'https://slack.com/favicon.ico'
     fname = basename(url)
-    driver.send_direct_message('upload %s' % url)
+    driver.send_direct_message('upload favicon')
     driver.wait_for_bot_direct_message('uploading <%s>' % url)
     driver.wait_for_file_uploaded(fname)
 

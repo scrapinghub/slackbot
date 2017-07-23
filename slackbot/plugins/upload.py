@@ -6,20 +6,21 @@ from slackbot.utils import download_file, create_tmp_file
 
 
 @respond_to(r'upload \<?(.*)\>?')
-def upload(message, url):
+def upload(message, thing):
     # message.channel.upload_file(slack_filename, local_filename,
     #                             initial_comment='')
-    url = url.lstrip('<').rstrip('>')
-    message.reply('uploading {}'.format(url))
-    if url.startswith('http'):
+    if thing == 'favicon':
+        url = 'https://slack.com/favicon.ico'
+        message.reply('uploading {}'.format(url))
         with create_tmp_file() as tmpf:
             download_file(url, tmpf)
             message.channel.upload_file(url, tmpf,
                                         'downloaded from {}'.format(url))
-    elif url == 'slack.png':
+    elif thing == 'slack.png':
+        message.reply('uploading slack.png')
         cwd = os.path.abspath(os.path.dirname(__file__))
         fname = os.path.join(cwd, '../../tests/functional/slack.png')
-        message.channel.upload_file(url, fname)
+        message.channel.upload_file(thing, fname)
 
 
 @respond_to('send_string_content')
