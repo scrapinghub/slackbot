@@ -65,6 +65,11 @@ def test_bot_respond_to_simple_message(driver):
     driver.wait_for_bot_direct_message('hello sender!')
 
 
+def test_bot_respond_to_simple_message_with_webapi(driver):
+    driver.send_direct_message('reply_webapi')
+    driver.wait_for_bot_direct_message('hello there!')
+
+
 def test_bot_respond_to_simple_message_with_formatting(driver):
     driver.send_direct_message('hello_formatting')
     driver.wait_for_bot_direct_message('_hello_ sender!')
