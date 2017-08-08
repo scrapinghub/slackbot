@@ -4,24 +4,25 @@ language: python
 python: 3.6
 cache:
   directories:
-    - $HOME/.cache/pip
-    - $TRAVIS_BUILD_DIR/.tox
+  - "$HOME/.cache/pip"
+  - "$TRAVIS_BUILD_DIR/.tox"
 before_install:
-  - mkdir -p $HOME/opt/local/bin
-  - export PATH=$HOME/opt/local/bin:$PATH
-  - pushd /tmp/ && git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure --prefix=$HOME/opt/local && make -j2 && make install && popd
-  - pip install shadowsocks
-  - cp scripts/slackbot-test-ctl $HOME/opt/local/bin
-  - slackbot-test-ctl init
-  - slackbot-test-ctl startproxy
+- mkdir -p $HOME/opt/local/bin
+- export PATH=$HOME/opt/local/bin:$PATH
+- pushd /tmp/ && git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng
+  && ./configure --prefix=$HOME/opt/local && make -j2 && make install && popd
+- pip install shadowsocks
+- cp scripts/slackbot-test-ctl $HOME/opt/local/bin
+- slackbot-test-ctl init
+- slackbot-test-ctl startproxy
 install: pip install tox
 script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: lins05
+  user: lins05_slackbot
   password:
-    secure: "diOVQyr+9Mr3UNSYqFkFLWs2+4+Rfp64x98Pt7FlWugO9TAoPOQSXoYCs71pszjkY7XNuo5mrbOvO6d8K6uAzQEYs/w+VXzxFcp2Cf/9oocvhQGU42M2r3Pwi89GMa1JcF81bUP+0OucAPCSOGeqyzemGKueb7fmin8PQwTE+5w="
+    secure: d+RIBeI8E66mLPZan5vgEYR5P4K+J8YfcAJR16MFVuoKkvMaCze+Ho5bFgUzN47wW+SzAjFixPI4fkB4Silk+7BCwMeQrBQq+CL9OYCZf2vPwl2K3QTScwVCreEF05u3V1x5lm3/UvzTAuz0knaXwrWelRm5DOVf3DZPjWEcXtA=
   on:
     tags: true
     repo: lins05/slackbot
