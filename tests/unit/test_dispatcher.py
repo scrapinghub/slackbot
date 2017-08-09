@@ -24,9 +24,9 @@ class FakePluginManager:
         if message == 'no_plugin_defined':
             return [[None, None, None]]
         if category == 'default_reply':
-            return [[getattr(self, 'default_'+message), [], []]]
+            return [[getattr(self, 'default_'+message), [], {}]]
         else:
-            return [[getattr(self, message), [], []]]
+            return [[getattr(self, message), [], {}]]
 
 
 class FakeClient:
