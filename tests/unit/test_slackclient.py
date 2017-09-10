@@ -41,6 +41,9 @@ def test_parse_channel_data(slack_client):
     }])
     assert slack_client.find_channel_by_name('fun') is None
     assert slack_client.find_channel_by_name('fun2') == 'C024BE91L'
+
+    # Although Slack has changed terminology for 'Groups' (now 'private channels'),
+    # The Slack API still uses the `is_group` property for private channels (as of 09/10/2017)
     assert slack_client.find_channel_by_name('test-group-joined') is None
     slack_client.parse_channel_data([{
         'created': 1497473029,
