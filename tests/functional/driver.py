@@ -258,7 +258,7 @@ class Driver(object):
         self.cm_chan = response.body['channel']['id']
         self._invite_testbot_to_channel()
 
-        # Slacker/Slack API still references to private_channels as 'groups'
+        # Slacker/Slack API's still references to private_channels as 'groups'
         private_channels = self.slacker.groups.list(self.test_private_channel).body['groups']
         for private_channel in private_channels:
             if self.test_private_channel == private_channel['name']:
