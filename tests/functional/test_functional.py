@@ -12,7 +12,7 @@ import pytest
 from tests.functional.driver import Driver
 from tests.functional.slackbot_settings import (
     testbot_apitoken, testbot_username,
-    driver_apitoken, driver_username, test_channel, test_group
+    driver_apitoken, driver_username, test_channel, test_private_channel
 )
 
 TRAVIS = 'TRAVIS' in os.environ
@@ -43,7 +43,7 @@ def driver():
                     driver_username,
                     testbot_username,
                     test_channel,
-                    test_group)
+                    test_private_channel)
     driver.start()
     p = _start_bot_process()
     driver.wait_for_bot_online()
@@ -140,16 +140,16 @@ def test_bot_channel_reply_to_name_colon(driver):
     driver.wait_for_bot_channel_message('hello channel!', tosender=False)
 
 
-def test_bot_group_reply_to_name_colon(driver):
-    driver.send_group_message('hello', tobot=False, toname=True)
-    driver.wait_for_bot_group_message('hello sender!')
-    driver.send_group_message('hello', tobot=False, toname=True, space=False)
-    driver.wait_for_bot_group_message('hello sender!')
-    driver.send_group_message('hello', tobot=False, toname=True, colon=False)
-    driver.wait_for_bot_group_message('hello channel!', tosender=False)
-    driver.send_group_message('hello', tobot=False, toname=True, colon=False,
+def test_bot_private_channel_reply_to_name_colon(driver):
+    driver.send_private_channel_message('hello', tobot=False, toname=True)
+    driver.wait_for_bot_private_channel_message('hello sender!')
+    driver.send_private_channel_message('hello', tobot=False, toname=True, space=False)
+    driver.wait_for_bot_private_channel_message('hello sender!')
+    driver.send_private_channel_message('hello', tobot=False, toname=True, colon=False)
+    driver.wait_for_bot_private_channel_message('hello channel!', tosender=False)
+    driver.send_private_channel_message('hello', tobot=False, toname=True, colon=False,
                                 space=False)
-    driver.wait_for_bot_group_message('hello channel!', tosender=False)
+    driver.wait_for_bot_private_channel_message('hello channel!', tosender=False)
 
 
 def test_bot_listen_to_channel_message(driver):
@@ -162,11 +162,11 @@ def test_bot_react_to_channel_message(driver):
     driver.ensure_reaction_posted('eggplant')
 
 
-def test_bot_reply_to_group_message(driver):
-    driver.send_group_message('hello')
-    driver.wait_for_bot_group_message('hello sender!')
-    driver.send_group_message('hello', colon=False)
-    driver.wait_for_bot_group_message('hello sender!')
+def test_bot_reply_to_private_channel_message(driver):
+    driver.send_private_channel_message('hello')
+    driver.wait_for_bot_private_channel_message('hello sender!')
+    driver.send_private_channel_message('hello', colon=False)
+    driver.wait_for_bot_private_channel_message('hello sender!')
 
 
 def test_bot_ignores_non_related_message_response_tosender(driver):
@@ -232,6 +232,6 @@ def test_bot_reply_thread_in_channel(driver):
     driver.wait_for_bot_channel_thread_message('I started a thread', tosender=False)
 
 
-def test_bot_reply_thread_in_group(driver):
-    driver.send_group_message('start a thread', tobot=False, colon=False)
-    driver.wait_for_bot_group_thread_message('I started a thread', tosender=False)
+def test_bot_reply_thread_in_private_channel(driver):
+    driver.send_private_channel_message('start a thread', tobot=False, colon=False)
+    driver.wait_for_bot_private_channel_thread_message('I started a thread', tosender=False)
