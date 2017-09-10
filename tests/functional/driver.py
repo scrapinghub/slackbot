@@ -12,12 +12,12 @@ class Driver(object):
     """Functional tests driver. It handles the communication with slack api, so that
     the tests code can concentrate on higher level logic.
     """
-    def __init__(self, driver_apitoken, driver_username, testbot_username, channel, group):
+    def __init__(self, driver_apitoken, driver_username, testbot_username, channel, private_channel):
         self.slacker = slacker.Slacker(driver_apitoken)
         self.driver_username = driver_username
         self.driver_userid = None
         self.test_channel = channel
-        self.test_group = group
+        self.test_private_channel = private_channel
         self.users = {}
         self.testbot_username = testbot_username
         self.testbot_userid = None
@@ -25,7 +25,7 @@ class Driver(object):
         self.cm_chan = None
         # direct message channel
         self.dm_chan = None
-        # private group channel
+        # private private_channel channel
         self.gm_chan = None
         self._start_ts = time.time()
         self._websocket = None
@@ -77,7 +77,7 @@ class Driver(object):
     def send_channel_message(self, msg, **kwargs):
         self._send_channel_message(self.cm_chan, msg, **kwargs)
 
-    def send_group_message(self, msg, **kwargs):
+    def send_private_channel_message(self, msg, **kwargs):
         self._send_channel_message(self.gm_chan, msg, **kwargs)
 
     def wait_for_bot_direct_message(self, match):
@@ -90,13 +90,13 @@ class Driver(object):
     def wait_for_bot_channel_message(self, match, tosender=True):
         self._wait_for_bot_message(self.cm_chan, match, tosender=tosender)
 
-    def wait_for_bot_group_message(self, match, tosender=True):
+    def wait_for_bot_private_channel_message(self, match, tosender=True):
         self._wait_for_bot_message(self.gm_chan, match, tosender=tosender)
 
     def wait_for_bot_channel_thread_message(self, match, tosender=False):
         self._wait_for_bot_message(self.gm_chan, match, tosender=tosender, thread=True)
 
-    def wait_for_bot_group_thread_message(self, match, tosender=False):
+    def wait_for_bot_private_channel_thread_message(self, match, tosender=False):
         self._wait_for_bot_message(self.gm_chan, match, tosender=tosender,
                                    thread=True)
 
@@ -258,22 +258,23 @@ class Driver(object):
         self.cm_chan = response.body['channel']['id']
         self._invite_testbot_to_channel()
 
-        groups = self.slacker.groups.list(self.test_group).body['groups']
-        for group in groups:
-            if self.test_group == group['name']:
-                self.gm_chan = group['id']
-                self._invite_testbot_to_group(group)
+        # Slacker/Slack API still references to private_channels as 'groups'
+        private_channels = self.slacker.groups.list(self.test_private_channel).body['groups']
+        for private_channel in private_channels:
+            if self.test_private_channel == private_channel['name']:
+                self.gm_chan = private_channel['id']
+                self._invite_testbot_to_private_channel(private_channel)
                 break
         else:
-            raise RuntimeError('Have you created the private group {} for testing?'.format(
-                self.test_group))
+            raise RuntimeError('Have you created the private channel {} for testing?'.format(
+                self.test_private_channel))
 
     def _invite_testbot_to_channel(self):
         if self.testbot_userid not in self.slacker.channels.info(self.cm_chan).body['channel']['members']:
             self.slacker.channels.invite(self.cm_chan, self.testbot_userid)
 
-    def _invite_testbot_to_group(self, group):
-        if self.testbot_userid not in group['members']:
+    def _invite_testbot_to_private_channel(self, private_channel):
+        if self.testbot_userid not in private_channel['members']:
             self.slacker.groups.invite(self.gm_chan, self.testbot_userid)
 
     def _is_bot_message(self, msg):

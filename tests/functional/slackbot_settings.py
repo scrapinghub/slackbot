@@ -11,7 +11,7 @@ def load_driver_settings():
         'driver_apitoken',
         'driver_username',
         'test_channel',
-        'test_group',
+        'test_private_channel',
     )
 
     for key in KEYS:
