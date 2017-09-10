@@ -19,10 +19,8 @@ def load_driver_settings():
         envkey = 'SLACKBOT_' + key.upper()
 
         # Backwards compatibility patch for TravisCI env variables
-        if 'PRIVATE_CHANNEL' in envkey:
-            print('TRIGGERED::os.environ.get(_private_group_patch)', os.environ.get(_private_group_patch))
-            if os.environ.get(_private_group_patch):
-                globals()[key] = os.environ.get(_private_group_patch, None)
+        if 'PRIVATE_CHANNEL' in envkey and os.environ.get(_private_group_patch):
+            globals()[key] = os.environ.get(_private_group_patch, None)
         else:
             globals()[key] = os.environ.get(envkey, None)
 
