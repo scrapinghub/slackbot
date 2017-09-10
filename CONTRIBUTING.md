@@ -80,7 +80,7 @@ testbot_username = 'testbot'
 driver_apitoken = 'xoxp-token'
 driver_username = 'your username'
 test_channel = 'testchannel'
-test_group = 'testgroup'
+test_private_channel = 'testprivatechannel'
 ```
 
 **Important note:** The bot token can be obtained by adding a custom bot integration in Slack. User tokens can be obtained at https://api.slack.com/docs/oauth-test-tokens. Slack tokens are like passwords! Don't commit them. If you're using them in some kind of Github or Travis automation, ensure they are for Slacks that are only for testing.
@@ -104,6 +104,6 @@ Log in to Travis and enable tests for your slackbot fork. Open Travis settings. 
 - SLACKBOT_DRIVER_APITOKEN
 - SLACKBOT_DRIVER_USERNAME
 - SLACKBOT_TEST_CHANNEL
-- SLACKBOT_TEST_GROUP
+- SLACKBOT_TEST_PRIVATE_CHANNEL
 
 You must also set `Limit concurrent jobs` to `1`. If you don't, you will see false positives/failures, especially in the test cases that verify slackbot's ability to automatically reconnect on disconnection.
