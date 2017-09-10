@@ -13,7 +13,7 @@ def load_driver_settings():
         'test_private_channel',
     )
 
-    _private_group_patch = 'SLACKBOT_PRIVATE_GROUP'
+    _private_group_patch = 'SLACKBOT_TEST_GROUP'
 
     for key in KEYS:
         envkey = 'SLACKBOT_' + key.upper()
