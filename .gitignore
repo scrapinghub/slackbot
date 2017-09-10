@@ -1,3 +1,9 @@
+# Pycharm
+.idea
+
+# Python & App
+__pycache__/
+*.py[cod]
 .env
 /.tox/
 *.pyc
