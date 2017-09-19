@@ -150,6 +150,9 @@ class SlackClient(object):
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
 
+    def open_dm_channel(self, user_id):
+        return self.webapi.im.open(user_id).body["channel"]["id"]
+
     def find_channel_by_name(self, channel_name):
         for channel_id, channel in iteritems(self.channels):
             try:
