@@ -31,7 +31,9 @@ class Bot(object):
     def run(self):
         self._plugins.init_plugins()
         self._dispatcher.start()
-        self._client.rtm_connect()
+        if not self._client.connected: 
+            self._client.rtm_connect()
+            
         _thread.start_new_thread(self._keepactive, tuple())
         logger.info('connected to slack RTM api')
         self._dispatcher.loop()
