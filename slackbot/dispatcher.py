@@ -281,6 +281,10 @@ class Message(object):
         return self._body
 
     @property
+    def user(self):
+        return self._client.get_user(self._body['user'])
+
+    @property
     def thread_ts(self):
         try:
             thread_ts = self.body['thread_ts']
