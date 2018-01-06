@@ -173,6 +173,12 @@ class SlackClient(object):
             channel=channel,
             timestamp=timestamp)
 
+    def unreact_to_message(self, emojiname, channel, timestamp):
+        self.webapi.reactions.remove(
+            name=emojiname,
+            channel=channel,
+            timestamp=timestamp)
+
 
 class SlackConnectionError(Exception):
     pass

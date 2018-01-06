@@ -159,7 +159,13 @@ def test_bot_listen_to_channel_message(driver):
 
 def test_bot_react_to_channel_message(driver):
     driver.send_channel_message('hey!', tobot=False)
-    driver.ensure_reaction_posted('eggplant')
+    driver.ensure_reaction_adding_posted('eggplant')
+
+
+def test_bot_unreact_to_channel_message(driver):
+    driver.send_channel_message('hey!', tobot=False)
+    driver.ensure_reaction_adding_posted('eggplant')
+    driver.ensure_reaction_removing_posted('eggplant')
 
 
 def test_bot_reply_to_private_channel_message(driver):

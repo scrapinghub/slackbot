@@ -131,10 +131,21 @@ class Driver(object):
         else:
             raise AssertionError('expected to get file "{}", but got nothing'.format(name))
 
-    def ensure_reaction_posted(self, emojiname, maxwait=5):
+    def ensure_reaction_adding_posted(self, emojiname, maxwait=5):
         for _ in range(maxwait):
             time.sleep(1)
             if self._has_reacted(emojiname):
+                break
+        else:
+            raise AssertionError('expected to get reaction "{}", but got nothing'.format(emojiname))
+
+    def ensure_reaction_removing_posted(self, emojiname, maxwait=5):
+        if not self._has_reacted(emojiname):
+            raise RuntimeError('Have you the reaction "{}" fortesting?'.format(emojiname))
+
+        for _ in range(maxwait):
+            time.sleep(1)
+            if not self._has_reacted(emojiname):
                 break
         else:
             raise AssertionError('expected to get reaction "{}", but got nothing'.format(emojiname))
