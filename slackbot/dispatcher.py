@@ -282,6 +282,15 @@ class Message(object):
             channel=self._body['channel'],
             timestamp=self._body['ts'])
 
+    def unreact(self, emojiname):
+        """
+           Un react to a message using the web api
+        """
+        self._client.unreact_to_message(
+            emojiname=emojiname,
+            channel=self._body['channel'],
+            timestamp=self._body['ts'])
+
     @property
     def channel(self):
         return self._client.get_channel(self._body['channel'])

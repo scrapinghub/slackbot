@@ -120,8 +120,12 @@ import re
 @respond_to('hi', re.IGNORECASE)
 def hi(message):
     message.reply('I can understand hi or HI!')
-    # react with thumb up emoji
+    # add reaction with thumb up emoji
     message.react('+1')
+
+    # remove reaction with thumb up emoji by bot-self
+    #time.sleep(1)
+    message.unreact('+1')
 
 @respond_to('I love you')
 def love(message):
