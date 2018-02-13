@@ -211,13 +211,18 @@ class Message(object):
             return text
 
     @unicode_compact
-    def reply_webapi(self, text, attachments=None, as_user=True, in_thread=False):
+    def reply_webapi(self, text, attachments=None, as_user=True, in_thread=None):
         """
             Send a reply to the sender using Web API
 
             (This function supports formatted message
             when using a bot integration)
+
+            If the message was send in a thread, answer in a thread per default.
         """
+        if in_thread is None:
+            in_thread = 'thread_ts' in self.body
+
         if in_thread:
             self.send_webapi(text, attachments=attachments, as_user=as_user, thread_ts=self.thread_ts)
         else:
@@ -240,13 +245,18 @@ class Message(object):
             thread_ts=thread_ts)
 
     @unicode_compact
-    def reply(self, text, in_thread=False):
+    def reply(self, text, in_thread=None):
         """
             Send a reply to the sender using RTM API
 
             (This function doesn't supports formatted message
             when using a bot integration)
+
+            If the message was send in a thread, answer in a thread per default.
         """
+        if in_thread is None:
+            in_thread = 'thread_ts' in self.body
+
         if in_thread:
             self.send(text, thread_ts=self.thread_ts)
         else:
