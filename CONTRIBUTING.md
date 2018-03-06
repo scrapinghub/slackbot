@@ -83,7 +83,7 @@ test_channel = 'testchannel'
 test_private_channel = 'testprivatechannel'
 ```
 
-**Important note:** The bot token can be obtained by adding a custom bot integration in Slack. User tokens can be obtained at https://api.slack.com/docs/oauth-test-tokens. Slack tokens are like passwords! Don't commit them. If you're using them in some kind of Github or Travis automation, ensure they are for Slacks that are only for testing.
+**Important note:** The bot token can be obtained by adding a custom bot integration in Slack. User tokens can be obtained at https://api.slack.com/custom-integrations/legacy-tokens . Slack tokens are like passwords! Don't commit them. If you're using them in some kind of Github or Travis automation, ensure they are for Slacks that are only for testing.
 
 At this point, you should be able to run tests:
 
