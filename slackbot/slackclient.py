@@ -68,9 +68,39 @@ class SlackClient(object):
 
     def send_to_websocket(self, data):
         """Send (data) directly to the websocket."""
-        data = json.dumps(data)
-        self.websocket.send(data)
 
+        self.websocket_safe_send(data)
+        return
+
+        # BDOCTOR
+        #data = json.dumps(data)
+        #try:
+        #    self.websocket.send(data)
+        #except Exception, e:
+        #    logger.error('failed to send data to websocket connection, try to reconnect now')
+
+    def websocket_safe_send(self, data):
+        """Safely send data to the websocket and retry on failure"""
+
+        data = json.dumps(data)
+        while True:
+            try:
+                self.websocket.send(data)
+                return
+            except WebSocketException as e:
+                logger.error('failed to send data to websocket connection, try to reconnect now')
+                if isinstance(e, WebSocketConnectionClosedException):
+                    logger.warning('lost websocket connection, try to reconnect now')
+                else:
+                    logger.warning('websocket exception: %s', e)
+                self.reconnect()
+            except Exception as e:
+                if isinstance(e, SSLError) and e.errno == 2:
+                    pass
+                else:
+                    logger.warning('Exception in websocket_safe_send: %s', e)
+                return
+ 
     def ping(self):
         return self.send_to_websocket({'type': 'ping'})
 
