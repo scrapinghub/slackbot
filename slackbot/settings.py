@@ -10,6 +10,11 @@ PLUGINS = [
 
 ERRORS_TO = None
 
+'''
+Setup timeout for slacker API requests (e.g. uploading a file).
+'''
+TIMEOUT = 100
+
 # API_TOKEN = '###token###'
 
 '''

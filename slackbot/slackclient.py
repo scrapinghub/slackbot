@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class SlackClient(object):
-    def __init__(self, token, bot_icon=None, bot_emoji=None, connect=True):
+    def __init__(self, token, timeout=None, bot_icon=None, bot_emoji=None, connect=True):
         self.token = token
         self.bot_icon = bot_icon
         self.bot_emoji = bot_emoji
@@ -31,7 +31,10 @@ class SlackClient(object):
         self.users = {}
         self.channels = {}
         self.connected = False
-        self.webapi = slacker.Slacker(self.token)
+        if timeout is None:
+            self.webapi = slacker.Slacker(self.token)
+        else:
+            self.webapi = slacker.Slacker(self.token, timeout=timeout)
 
         if connect:
             self.rtm_connect()
