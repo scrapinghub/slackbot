@@ -4,6 +4,7 @@ This release contains the following new features:
 
 This release contains the following fixes:
 
+  * [#168] Add a user attribute to Message (thanks, @jonas-schulze)
   * [#93, #160] Change "group" to "private channel" to match Slack terminology
     (thanks, @DannyHinshaw!)
 
