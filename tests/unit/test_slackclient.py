@@ -76,3 +76,12 @@ def test_parse_user_data(slack_client):
     }])
     assert slack_client.find_user_by_name('bob') is None
     assert slack_client.find_user_by_name('bob2') == 'U123456'
+
+
+def test_init_with_timeout():
+    client = SlackClient(None, connect=False)
+    assert client.webapi.api.timeout == 10  # seconds default timeout
+
+    expected_timeout = 42  # seconds
+    client = SlackClient(None, connect=False, timeout=expected_timeout)
+    assert client.webapi.api.timeout == expected_timeout
