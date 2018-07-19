@@ -62,7 +62,11 @@ class SlackClient(object):
 
         proxy, proxy_port, no_proxy = None, None, None
         if 'http_proxy' in os.environ:
-            proxy, proxy_port = os.environ['http_proxy'].split(':')
+            proxy, proxy_port = os.environ['http_proxy'].rsplit(':',1)
+        if 'http://' in proxy:
+            proxy = proxy[7:]
+        if '/' in proxy_port:
+            proxy_port = proxy_port[:-1]
         if 'no_proxy' in os.environ:
             no_proxy = os.environ['no_proxy']
 
