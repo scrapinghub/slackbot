@@ -19,6 +19,8 @@ class Bot(object):
     def __init__(self):
         self._client = SlackClient(
             settings.API_TOKEN,
+            timeout=settings.TIMEOUT if hasattr(settings,
+                                                'TIMEOUT') else None,
             bot_icon=settings.BOT_ICON if hasattr(settings,
                                                   'BOT_ICON') else None,
             bot_emoji=settings.BOT_EMOJI if hasattr(settings,
