@@ -88,10 +88,10 @@ def get_proxy_setting():
     proxy, proxy_port, no_proxy = None, None, None
     if 'http_proxy' in os.environ:
         proxy, proxy_port = os.environ['http_proxy'].rsplit(':',1)
-    # if 'http://' in proxy:
-    proxy = proxy.replace('http://', '')
-    # if '/' in proxy_port:
-    proxy_port = proxy_port.replace('/','')
+    if 'http://' in proxy:
+        proxy = proxy.replace('http://', '')
+    if '/' in proxy_port:
+        proxy_port = proxy_port.replace('/','')
     if 'no_proxy' in os.environ:
         no_proxy = os.environ['no_proxy']
 
