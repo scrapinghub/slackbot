@@ -77,3 +77,22 @@ class WorkerPool(object):
         while True:
             msg = self.queue.get()
             self.func(msg)
+
+def get_proxy_setting():
+    """To get a fixed proxy setting
+    "http://USERNAME:PASSWORD@proxy.server.com:1234/"
+              || 
+              \/
+    "USERNAME:PASSWORD@proxy.server.com", "1234"
+    """
+    proxy, proxy_port, no_proxy = None, None, None
+    if 'http_proxy' in os.environ:
+        proxy, proxy_port = os.environ['http_proxy'].rsplit(':',1)
+    # if 'http://' in proxy:
+    proxy = proxy.replace('http://', '')
+    # if '/' in proxy_port:
+    proxy_port = proxy_port.replace('/','')
+    if 'no_proxy' in os.environ:
+        no_proxy = os.environ['no_proxy']
+
+    return (proxy, proxy_port, no_proxy)
