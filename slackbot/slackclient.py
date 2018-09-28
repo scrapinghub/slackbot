@@ -15,6 +15,7 @@ from websocket import (
 )
 
 from slackbot.utils import to_utf8
+from slackbot.utils import get_proxy_setting
 
 logger = logging.getLogger(__name__)
 
@@ -60,16 +61,7 @@ class SlackClient(object):
         self.parse_channel_data(login_data['groups'])
         self.parse_channel_data(login_data['ims'])
 
-        proxy, proxy_port, no_proxy = None, None, None
-        if 'http_proxy' in os.environ:
-            proxy, proxy_port = os.environ['http_proxy'].rsplit(':',1)
-        if 'http://' in proxy:
-            proxy = proxy[7:]
-        if '/' in proxy_port:
-            proxy_port = proxy_port[:-1]
-        if 'no_proxy' in os.environ:
-            no_proxy = os.environ['no_proxy']
-
+        proxy, proxy_port, no_proxy = get_proxy_setting()
         self.websocket = create_connection(self.login_data['url'], http_proxy_host=proxy,
                                            http_proxy_port=proxy_port, http_no_proxy=no_proxy)
 
