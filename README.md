@@ -8,7 +8,7 @@ A chat bot for [Slack](https://slack.com) inspired by [llimllib/limbo](https://g
 * Simple plugins mechanism
 * Messages can be handled concurrently
 * Automatically reconnect to slack when connection is lost
-* Python3 Support
+* Python2 + Python3 Support
 * [Full-fledged functional tests](tests/functional/test_functional.py)
 
 ## Installation
@@ -54,13 +54,16 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
 ##### Configure the default answer
+
 Add a DEFAULT_REPLY to `slackbot_settings.py`:
 ```python
 DEFAULT_REPLY = "Sorry but I didn't understand you"
 ```
 
 ##### Configure the docs answer
+
 The `message` attribute passed to [your custom plugins](#create-plugins) has an special function `message.docs_reply()` that will parse all the plugins available and return the Docs in each of them.
 
 ##### Send all tracebacks directly to a channel, private channel, or user
@@ -73,6 +76,7 @@ ERRORS_TO = 'username'
 ```
 
 ##### Configure the plugins
+
 Add [your plugin modules](#create-plugins) to a `PLUGINS` list in `slackbot_settings.py`:
 
 ```python
@@ -104,6 +108,7 @@ def github():
     }]
     message.send_webapi('', json.dumps(attachments))
 ```
+
 ## Create Plugins
 
 A chat bot is meaningless unless you can extend/customize it to fit your own use cases.
@@ -173,7 +178,7 @@ PLUGINS = [
 
 ## The `@default_reply` decorator
 
-*added in slackbot 0.4.1*
+*Added in slackbot 0.4.1*
 
 Besides specifying `DEFAULT_REPLY` in `slackbot_settings.py`, you can also decorate a function with the `@default_reply` decorator to make it the default reply handler, which is more handy.
 
