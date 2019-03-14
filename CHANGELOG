@@ -1,3 +1,11 @@
+Release Notes - Slackbot - Version 0.5.4
+--------------------------------------------
+This release contains the following new features:
+
+This release contains the following fixes:
+
+  * [#161] Handle new line #176 (thanks, @twcurrie)
+
 Release Notes - Slackbot - Version 0.5.3
 --------------------------------------------
 This release contains the following new features:
