@@ -52,7 +52,10 @@ except ImportError:
     try:
         from local_settings import *
     except ImportError:
-        pass
+        try:
+            from config.slackbot_settings import *
+        except ImportError:
+            pass
 
 # convert default_reply to DEFAULT_REPLY
 try:
