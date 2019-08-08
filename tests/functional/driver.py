@@ -204,7 +204,7 @@ class Driver(object):
         while True:
             try:
                 data += '{0}\n'.format(self._websocket.recv())
-            except:
+            except Exception:
                 return data.rstrip()
 
     def _rtm_read_forever(self):
