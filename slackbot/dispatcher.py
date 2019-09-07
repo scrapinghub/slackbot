@@ -48,11 +48,11 @@ class MessageDispatcher(object):
 
     def _dispatch_msg_handler(self, category, msg):
         responded = False
-        for func, args in self._plugins.get_plugins(category, msg.get('text', None)):
+        for func, args, kwargs in self._plugins.get_plugins(category, msg.get('text', None)):
             if func:
                 responded = True
                 try:
-                    func(Message(self._client, msg), *args)
+                    func(Message(self._client, msg), *args, **kwargs)
                 except:
                     logger.exception(
                         'failed to handle message %s with plugin "%s"',

@@ -154,6 +154,15 @@ def giveme(message, something):
     message.reply('Here is {}'.format(something))
 ```
 
+You can use group name as kwargs:
+```python
+from slackbot.bot import respond_to
+
+@respond_to('Hello (?P<name>.+)')
+def say_hello(message, name):
+    message.reply('Hello! {}'.format(name)
+```
+
 If you would like to have a command like 'stats' and 'stats start_date end_date', you can create reg ex like so:
 
 ```python
