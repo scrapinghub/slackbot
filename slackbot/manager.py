@@ -58,7 +58,7 @@ class PluginsManager(object):
         for module in module_list:
             try:
                 import_module(module)
-            except:
+            except Exception:
                 # TODO Better exception handling
                 logger.exception('Failed to import %s', module)
 
