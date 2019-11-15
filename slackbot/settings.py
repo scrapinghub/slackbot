@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from importlib import import_module
 
 DEBUG = False
 
@@ -46,16 +47,18 @@ for key in os.environ:
         name = key[9:]
         globals()[name] = os.environ[key]
 
-try:
-    from slackbot_settings import *
-except ImportError:
+for location in ['slackbot_settings', 'local_settings', 'config.slackbot_settings']:
     try:
-        from local_settings import *
+        settings = import_module(location)
+        break
     except ImportError:
-        try:
-            from config.slackbot_settings import *
-        except ImportError:
-            pass
+        pass
+
+try:
+    names = [x for x in settings.__dict__ if not x.startswith("_")]
+    globals().update({k: getattr(settings, k) for k in names})
+except NameError:
+    raise IOError("No configuration file found")
 
 # convert default_reply to DEFAULT_REPLY
 try:
