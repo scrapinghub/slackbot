@@ -77,3 +77,19 @@ class WorkerPool(object):
         while True:
             msg = self.queue.get()
             self.func(msg)
+
+
+def get_http_proxy(environ):
+    proxy, proxy_port, no_proxy = None, None, None
+
+    if 'http_proxy' in environ:
+        http_proxy = environ['http_proxy']
+        prefix = 'http://'
+        if http_proxy.startswith(prefix):
+            http_proxy = http_proxy[len(prefix):]
+        proxy, proxy_port = http_proxy.split(':')
+
+    if 'no_proxy' in environ:
+        no_proxy = environ['no_proxy']
+
+    return proxy, proxy_port, no_proxy
