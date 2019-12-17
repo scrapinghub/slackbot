@@ -63,7 +63,7 @@ class SlackClient(object):
         self.parse_channel_data(login_data['groups'])
         self.parse_channel_data(login_data['ims'])
 
-        proxy, proxy_port, no_proxy = get_http_proxy()
+        proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
         self.websocket = create_connection(self.login_data['url'], http_proxy_host=proxy,
                                            http_proxy_port=proxy_port, http_no_proxy=no_proxy)
