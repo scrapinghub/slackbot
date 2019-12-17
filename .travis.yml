@@ -15,11 +15,7 @@ before_install:
 - slackbot-test-ctl init
 - slackbot-test-ctl startproxy
 install: pip install tox
-script:
-  - |
-    if [[ $TRAVIS_TAG == "" ]]; then
-      tox
-    fi
+script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
