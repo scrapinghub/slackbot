@@ -84,6 +84,8 @@ class MessageDispatcher(object):
         except (KeyError, TypeError):
             if 'username' in msg:
                 username = msg['username']
+            elif 'bot_profile' in msg and 'name' in msg['bot_profile']:
+                username = msg['bot_profile']['name']
             else:
                 return
 
