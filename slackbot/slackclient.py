@@ -146,6 +146,13 @@ class SlackClient(object):
                 as_user=as_user,
                 thread_ts=thread_ts)
 
+    def send_ephemeral_message(self, channel, message, attachments=None):
+        self.webapi.chat.post_ephemeral(
+            channel,
+            message,
+            user=self.login_data['self']['name'],
+            attachments=attachments)
+
     def get_channel(self, channel_id):
         return Channel(self, self.channels[channel_id])
 
