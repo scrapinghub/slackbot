@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class SlackClient(object):
     def __init__(self, token, timeout=None, bot_icon=None, bot_emoji=None, connect=True,
-                 rtm_simple_latest=False, rtm_no_unreads=False, rtm_mpim_aware=False):
+                 rtm_start_args=None):
         self.token = token
         self.bot_icon = bot_icon
         self.bot_emoji = bot_emoji
@@ -32,9 +32,7 @@ class SlackClient(object):
         self.users = {}
         self.channels = {}
         self.connected = False
-        self.rtm_simple_latest = rtm_simple_latest
-        self.rtm_no_unreads = rtm_no_unreads
-        self.rtm_mpim_aware = rtm_mpim_aware
+        self.rtm_start_args = rtm_start_args
 
         if timeout is None:
             self.webapi = slacker.Slacker(self.token)
@@ -45,9 +43,7 @@ class SlackClient(object):
             self.rtm_connect()
 
     def rtm_connect(self):
-        reply = self.webapi.rtm.start(simple_latest=self.rtm_simple_latest,
-                                      no_unreads=self.rtm_no_unreads,
-                                      mpim_aware=self.rtm_mpim_aware).body
+        reply = self.webapi.rtm.start(**(self.rtm_start_args or {})).body
         time.sleep(1)
         self.parse_slack_login_data(reply)
 
