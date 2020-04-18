@@ -16,8 +16,6 @@ class PluginsManager(object):
     def __init__(self):
         pass
 
-    _space_pattern = re.compile(r'\s')
-
     commands = {
         'respond_to': {},
         'listen_to': {},
@@ -70,7 +68,7 @@ class PluginsManager(object):
         if text is None:
             text = ''
         text = text.strip()
-        text = self._space_pattern.sub(' ', text)
+        text = re.sub(r'\s', ' ', text)
         for matcher in self.commands[category]:
             m = matcher.search(text)
             if m:
