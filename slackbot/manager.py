@@ -66,6 +66,7 @@ class PluginsManager(object):
         has_matching_plugin = False
         if text is None:
             text = ''
+        text = text.strip()
         for matcher in self.commands[category]:
             m = matcher.search(text)
             if m:
