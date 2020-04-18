@@ -2,6 +2,7 @@
 
 import os
 import logging
+import re
 from glob import glob
 from six import PY2
 from importlib import import_module
@@ -67,6 +68,7 @@ class PluginsManager(object):
         if text is None:
             text = ''
         text = text.strip()
+        text = re.sub(r'\s', ' ', text)
         for matcher in self.commands[category]:
             m = matcher.search(text)
             if m:
