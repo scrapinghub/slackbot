@@ -36,6 +36,15 @@ def test_get_plugins_text_starting_with_u00a0():
         assert len(args) == 0
 
 
+def test_get_plugins_text_ending_with_u00a0():
+    p = PluginsManager()
+    f = lambda x: x
+    p.commands['respond_to'][re.compile(r'^dummy$')] = f
+    for func, args in p.get_plugins('respond_to', 'dummy\u00a0'):
+        assert func == f
+        assert len(args) == 0
+
+
 def test_get_plugins_text_with_u00a0():
     p = PluginsManager()
     f = lambda x: x
