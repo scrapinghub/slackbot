@@ -31,7 +31,6 @@ def test_get_plugins_text_starting_with_u00a0():
     p = PluginsManager()
     f = lambda x: x
     p.commands['respond_to'][re.compile(r'^dummy$')] = f
-    # Calling get_plugins() with `text == None`
     for func, args in p.get_plugins('respond_to', '\u00a0dummy'):
         assert func == f
         assert len(args) == 0
@@ -41,7 +40,6 @@ def test_get_plugins_text_with_u00a0():
     p = PluginsManager()
     f = lambda x: x
     p.commands['respond_to'][re.compile(r'^dummy foo$')] = f
-    # Calling get_plugins() with `text == None`
     for func, args in p.get_plugins('respond_to', 'dummy\u00a0foo'):
         assert func == f
         assert len(args) == 0
