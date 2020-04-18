@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 class PluginsManager(object):
     def __init__(self):
-        self._space_pattern = re.compile(r'\s')
+        pass
+
+    _space_pattern = re.compile(r'\s')
 
     commands = {
         'respond_to': {},
