@@ -124,19 +124,21 @@ class SlackClient(object):
             }
         self.send_to_websocket(message_json)
 
-    def upload_file(self, channel, fname, fpath, comment):
+    def upload_file(self, channel, fname, fpath, comment, thread_ts=None):
         fname = fname or to_utf8(os.path.basename(fpath))
         self.webapi.files.upload(fpath,
                                  channels=channel,
                                  filename=fname,
-                                 initial_comment=comment)
+                                 initial_comment=comment,
+                                 thread_ts=thread_ts)
 
-    def upload_content(self, channel, fname, content, comment):
+    def upload_content(self, channel, fname, content, comment, thread_ts=None):
         self.webapi.files.upload(None,
                                  channels=channel,
                                  content=content,
                                  filename=fname,
-                                 initial_comment=comment)
+                                 initial_comment=comment,
+                                 thread_ts=thread_ts)
 
     def send_message(self, channel, message, attachments=None, as_user=True, thread_ts=None):
         self.webapi.chat.post_message(
@@ -193,18 +195,20 @@ class Channel(object):
         cid = self._body['id']
         return name == compare_str or "#" + name == compare_str or cid == compare_str
 
-    def upload_file(self, fname, fpath, initial_comment=''):
+    def upload_file(self, fname, fpath, initial_comment='', thread_ts=None):
         self._client.upload_file(
             self._body['id'],
             to_utf8(fname),
             to_utf8(fpath),
-            to_utf8(initial_comment)
+            to_utf8(initial_comment),
+            thread_ts
         )
 
-    def upload_content(self, fname, content, initial_comment=''):
+    def upload_content(self, fname, content, initial_comment='', thread_ts=None):
         self._client.upload_content(
             self._body['id'],
             to_utf8(fname),
             to_utf8(content),
-            to_utf8(initial_comment)
+            to_utf8(initial_comment),
+            thread_ts
         )
