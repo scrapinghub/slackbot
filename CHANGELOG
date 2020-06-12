@@ -1,3 +1,20 @@
+Release Notes - Slackbot - Version 1.0.0
+--------------------------------------------
+This release contains the following new features:
+
+This release contains the following fixes:
+
+  * Removed Python 2 Support
+
+
+Release Notes - Slackbot - Version 0.5.7
+--------------------------------------------
+This release contains the following new features:
+
+This release contains the following fixes:
+
+  * [#208] Handle new line #208 (thanks, @louhow)
+
 Release Notes - Slackbot - Version 0.5.4
 --------------------------------------------
 This release contains the following new features:
