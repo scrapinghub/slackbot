@@ -5,11 +5,12 @@ import logging
 import re
 import time
 import traceback
+import unicodedata
 from functools import wraps
 
 import six
 from slackbot.manager import PluginsManager
-from slackbot.utils import WorkerPool
+from slackbot.utils import WorkerPool, normalize_unicode_text
 from slackbot import settings
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,7 @@ class MessageDispatcher(object):
         return self._client.login_data['self']['name']
 
     def filter_text(self, msg):
-        full_text = msg.get('text', '') or ''
+        full_text = normalize_unicode_text(msg.get('text', '')) or ''
         channel = msg['channel']
         bot_name = self._get_bot_name()
         bot_id = self._get_bot_id()
@@ -119,7 +120,7 @@ class MessageDispatcher(object):
 
             atuser = matches.get('atuser')
             username = matches.get('username')
-            text = matches.get('text')
+            text = normalize_unicode_text(matches.get('text'))
             alias = matches.get('alias')
 
             if alias:
@@ -133,7 +134,7 @@ class MessageDispatcher(object):
             msg['text'] = text
         else:
             if m:
-                msg['text'] = m.groupdict().get('text', None)
+                msg['text'] = normalize_unicode_text(m.groupdict().get('text', None))
         return msg
 
     def loop(self):

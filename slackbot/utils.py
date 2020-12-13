@@ -4,6 +4,7 @@ import os
 import logging
 import tempfile
 import requests
+import unicodedata
 from contextlib import contextmanager
 from six.moves import _thread, range, queue
 import six
@@ -23,6 +24,9 @@ def download_file(url, fpath, token=''):
     logger.debug('fetch %s', fpath)
     return fpath
 
+def normalize_unicode_text(s):
+    if s:
+        return unicodedata.normalize("NFKD", s)
 
 def to_utf8(s):
     """Convert a string to utf8. If the argument is an iterable

@@ -211,3 +211,12 @@ def test_none_text(dispatcher):
     # Should not raise a TypeError
     msg = dispatcher.filter_text(msg)
     assert msg is None
+
+
+def test_non_breaking_spaces_are_removed_from_text(dispatcher):
+    msg = {
+        'text': FAKE_BOT_ATNAME + u"\xa0" + "hello" + u"\xa0" + "world",
+        'channel': 'C99999'
+    }
+    msg = dispatcher.filter_text(msg).get("text")
+    assert msg == "hello world"
