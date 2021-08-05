@@ -38,6 +38,13 @@ effect.
 # BOT_ICON = 'http://lorempixel.com/64/64/abstract/7/'
 # BOT_EMOJI = ':godmode:'
 
+
+'''
+When starting an RTM session, Slack allows you to provide arguments. More details here:
+https://api.slack.com/methods/rtm.start
+'''
+# RTM_START_ARGS = None
+
 '''Specify a different reply when the bot is messaged with no matching cmd'''
 DEFAULT_REPLY = None
 

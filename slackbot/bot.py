@@ -24,7 +24,9 @@ class Bot(object):
             bot_icon=settings.BOT_ICON if hasattr(settings,
                                                   'BOT_ICON') else None,
             bot_emoji=settings.BOT_EMOJI if hasattr(settings,
-                                                    'BOT_EMOJI') else None
+                                                    'BOT_EMOJI') else None,
+            rtm_start_args=settings.RTM_START_ARGS if hasattr(settings,
+                                                              'RTM_START_ARGS') else None
         )
         self._plugins = PluginsManager()
         self._dispatcher = MessageDispatcher(self._client, self._plugins,
@@ -33,9 +35,9 @@ class Bot(object):
     def run(self):
         self._plugins.init_plugins()
         self._dispatcher.start()
-        if not self._client.connected: 
+        if not self._client.connected:
             self._client.rtm_connect()
-            
+
         _thread.start_new_thread(self._keepactive, tuple())
         logger.info('connected to slack RTM api')
         self._dispatcher.loop()
