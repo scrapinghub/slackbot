@@ -80,8 +80,8 @@ def test_parse_user_data(slack_client):
 
 def test_init_with_timeout():
     client = SlackClient(None, connect=False)
-    assert client.webapi.api.timeout == 10  # seconds default timeout
+    assert client.webapi.timeout == 30  # seconds default timeout
 
     expected_timeout = 42  # seconds
     client = SlackClient(None, connect=False, timeout=expected_timeout)
-    assert client.webapi.api.timeout == expected_timeout
+    assert client.webapi.timeout == expected_timeout

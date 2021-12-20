@@ -7,7 +7,8 @@ import logging
 import time
 from ssl import SSLError
 
-import slacker
+import slack_sdk
+
 from six import iteritems
 
 from websocket import (
@@ -35,16 +36,15 @@ class SlackClient(object):
         self.rtm_start_args = rtm_start_args
 
         if timeout is None:
-            self.webapi = slacker.Slacker(self.token)
+            self.webapi = slack_sdk.WebClient(self.token)
         else:
-            self.webapi = slacker.Slacker(self.token, timeout=timeout)
+            self.webapi = slack_sdk.WebClient(self.token, timeout=timeout)
 
         if connect:
             self.rtm_connect()
 
     def rtm_connect(self):
-        reply = self.webapi.rtm.start(**(self.rtm_start_args or {})).body
-        time.sleep(1)
+        reply = self.webapi.rtm_connect()
         self.parse_slack_login_data(reply)
 
     def reconnect(self):
@@ -61,10 +61,11 @@ class SlackClient(object):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
-        self.parse_user_data(login_data['users'])
-        self.parse_channel_data(login_data['channels'])
-        self.parse_channel_data(login_data['groups'])
-        self.parse_channel_data(login_data['ims'])
+        self.parse_user_data(self.webapi.users_list()['members'])
+        self.parse_channel_data(self.webapi.conversations_list(
+            exclude_archived=True,
+            types="public_channel,private_channel"
+        )['channels'])
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
@@ -126,26 +127,26 @@ class SlackClient(object):
 
     def upload_file(self, channel, fname, fpath, comment):
         fname = fname or to_utf8(os.path.basename(fpath))
-        self.webapi.files.upload(fpath,
+        self.webapi.files_upload(file=fpath,
                                  channels=channel,
                                  filename=fname,
                                  initial_comment=comment)
 
     def upload_content(self, channel, fname, content, comment):
-        self.webapi.files.upload(None,
-                                 channels=channel,
+        self.webapi.files_upload(channels=channel,
                                  content=content,
                                  filename=fname,
                                  initial_comment=comment)
 
-    def send_message(self, channel, message, attachments=None, as_user=True, thread_ts=None):
-        self.webapi.chat.post_message(
-                channel,
-                message,
+    def send_message(self, channel, message, attachments=None, blocks=None, as_user=True, thread_ts=None):
+        self.webapi.chat_postMessage(
+                channel=channel,
+                text=message,
                 username=self.login_data['self']['name'],
                 icon_url=self.bot_icon,
                 icon_emoji=self.bot_emoji,
                 attachments=attachments,
+                blocks=blocks,
                 as_user=as_user,
                 thread_ts=thread_ts)
 
@@ -153,7 +154,7 @@ class SlackClient(object):
         return Channel(self, self.channels[channel_id])
 
     def open_dm_channel(self, user_id):
-        return self.webapi.im.open(user_id).body["channel"]["id"]
+        return self.webapi.conversations_open(users=[user_id])["channel"]["id"]
 
     def find_channel_by_name(self, channel_name):
         for channel_id, channel in iteritems(self.channels):
@@ -173,7 +174,7 @@ class SlackClient(object):
                 return userid
 
     def react_to_message(self, emojiname, channel, timestamp):
-        self.webapi.reactions.add(
+        self.webapi.reactions_add(
             name=emojiname,
             channel=channel,
             timestamp=timestamp)
