@@ -8,7 +8,7 @@ import time
 from ssl import SSLError
 
 import slack_sdk
-from slack_sdk.errors import SlackApiError
+from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 
 from six import iteritems
 
@@ -41,6 +41,10 @@ class SlackClient(object):
         else:
             self.webapi = slack_sdk.WebClient(self.token, timeout=timeout)
 
+        rate_limit_handler = RateLimitErrorRetryHandler(max_retry_count=100)
+        # Enable rate limited error retries
+        self.webapi.retry_handlers.append(rate_limit_handler)
+
         if connect:
             self.rtm_connect()
 
@@ -62,51 +66,28 @@ class SlackClient(object):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
-        self.get_user_data()
-        self.get_channel_data()
+        for page in self.webapi.users_list(limit=200):
+            self.parse_user_data(page['members'])
+        for page in self.webapi.conversations_list(
+                exclude_archived=True,
+                types="public_channel,private_channel",
+                limit=200
+        ):
+            self.parse_channel_data(page['channels'])
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
-        self.websocket = create_connection(self.login_data['url'], http_proxy_host=proxy,
-                                           http_proxy_port=proxy_port, http_no_proxy=no_proxy)
+        self.websocket = create_connection(
+            self.login_data['url'],
+            http_proxy_host=proxy,
+            http_proxy_port=proxy_port,
+            http_no_proxy=no_proxy
+        )
 
         self.websocket.sock.setblocking(0)
 
-    def get_channel_data(self):
-        cursor = True
-        while cursor:
-            try:
-                page = self.webapi.conversations_list(exclude_archived=True,
-                                                      types="public_channel,private_channel",
-                                                      limit=200,
-                                                      cursor=cursor if cursor is not True else None)
-                self.parse_channel_data(page['channels'])
-                cursor = page["response_metadata"]["next_cursor"]
-            except SlackApiError as err:
-                # catch rate limit errors
-                if err.response["error"] == "ratelimited":
-                    logger.warning('slackapi rate limit; sleeping 30 seconds and trying again')
-                    time.sleep(30)
-                else:
-                    raise err
-
     def parse_channel_data(self, channel_data):
         self.channels.update({c['id']: c for c in channel_data})
-
-    def get_user_data(self):
-        cursor = True
-        while cursor:
-            try:
-                page = self.webapi.users_list(limit=200, cursor=cursor if cursor is not True else None)
-                self.parse_user_data(page['members'])
-                cursor = page["response_metadata"]["next_cursor"]
-            except SlackApiError as err:
-                # catch rate limit errors
-                if err.response["error"] == "ratelimited":
-                    logger.warning('slackapi rate limit; sleeping 30 seconds and trying again')
-                    time.sleep(30)
-                else:
-                    raise err
 
     def parse_user_data(self, user_data):
         self.users.update({u['id']: u for u in user_data})
