@@ -92,12 +92,12 @@ class SlackClient(object):
 
     def parse_channel_data(self, channel_data):
         self.ping()
-        logger.debug(f'Adding {len(channel_data)} channels')
+        logger.debug('Adding %d channels', len(channel_data))
         self.channels.update({c['id']: c for c in channel_data})
 
     def parse_user_data(self, user_data):
         self.ping()
-        logger.debug(f'Adding {len(user_data)} users')
+        logger.debug('Adding %d users', len(user_data))
         self.users.update({u['id']: u for u in user_data})
 
     def send_to_websocket(self, data):
