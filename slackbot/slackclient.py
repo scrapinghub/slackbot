@@ -51,6 +51,7 @@ class SlackClient(object):
     def rtm_connect(self):
         reply = self.webapi.rtm_connect()
         self.parse_slack_login_data(reply)
+        self.connected = True
 
     def reconnect(self):
         while True:
@@ -66,14 +67,6 @@ class SlackClient(object):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
-        for page in self.webapi.users_list(limit=200):
-            self.parse_user_data(page['members'])
-        for page in self.webapi.conversations_list(
-                exclude_archived=True,
-                types="public_channel,private_channel",
-                limit=200
-        ):
-            self.parse_channel_data(page['channels'])
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
@@ -86,10 +79,25 @@ class SlackClient(object):
 
         self.websocket.sock.setblocking(0)
 
+        logger.debug('Getting users')
+        for page in self.webapi.users_list(limit=200):
+            self.parse_user_data(page['members'])
+        logger.debug('Getting channels')
+        for page in self.webapi.conversations_list(
+                exclude_archived=True,
+                types="public_channel,private_channel",
+                limit=1000
+        ):
+            self.parse_channel_data(page['channels'])
+
     def parse_channel_data(self, channel_data):
+        self.ping()
+        logger.debug(f'Adding {len(channel_data)} channels')
         self.channels.update({c['id']: c for c in channel_data})
 
     def parse_user_data(self, user_data):
+        self.ping()
+        logger.debug(f'Adding {len(user_data)} users')
         self.users.update({u['id']: u for u in user_data})
 
     def send_to_websocket(self, data):
