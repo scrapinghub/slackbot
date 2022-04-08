@@ -11,7 +11,7 @@ PLUGINS = [
 ERRORS_TO = None
 
 '''
-Setup timeout for slacker API requests (e.g. uploading a file).
+Setup timeout for API requests (e.g. uploading a file).
 '''
 TIMEOUT = 100
 

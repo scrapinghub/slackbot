@@ -78,18 +78,29 @@ class MessageDispatcher(object):
             return
 
         botname = self._get_bot_name()
+        username = None
         try:
-            msguser = self._client.users.get(msg['user'])
+            userid = msg['user']
+            logger.debug('trying to get username for user ID %s', userid)
+            msguser = self._client.get_user(userid)
+            logger.debug('got result from get_user for user ID %s: %s', msguser, userid)
             username = msguser['name']
-        except (KeyError, TypeError):
+            logger.debug('setting username %s for user ID %s', username, userid)
+        except (KeyError, TypeError) as e:
+            logger.debug('caught exception when getting username: %s', str(e))
             if 'username' in msg:
                 username = msg['username']
+                logger.debug('setting username from msg to %s', username)
             elif 'bot_profile' in msg and 'name' in msg['bot_profile']:
                 username = msg['bot_profile']['name']
-            else:
-                return
+                logger.debug('setting username from bot_profile in msg to %s', username)
+
+        if username is None:
+            logger.debug('could not get username for message, cannot process it')
+            return
 
         if username == botname or username == u'slackbot':
+            logger.debug('ignoring message because its from bot')
             return
 
         msg_respond_to = self.filter_text(msg)
@@ -143,14 +154,6 @@ class MessageDispatcher(object):
                 event_type = event.get('type')
                 if event_type == 'message':
                     self._on_new_message(event)
-                elif event_type in ['channel_created', 'channel_rename',
-                                    'group_joined', 'group_rename',
-                                    'im_created']:
-                    channel = [event['channel']]
-                    self._client.parse_channel_data(channel)
-                elif event_type in ['team_join', 'user_change']:
-                    user = [event['user']]
-                    self._client.parse_user_data(user)
             time.sleep(1)
 
     def _default_reply(self, msg):

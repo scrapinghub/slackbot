@@ -7,7 +7,7 @@ import logging
 import time
 from ssl import SSLError
 
-import slacker
+from slack_sdk import WebClient
 from six import iteritems
 
 from websocket import (
@@ -29,21 +29,19 @@ class SlackClient(object):
         self.domain = None
         self.login_data = None
         self.websocket = None
-        self.users = {}
-        self.channels = {}
         self.connected = False
         self.rtm_start_args = rtm_start_args
 
         if timeout is None:
-            self.webapi = slacker.Slacker(self.token)
+            self.webapi = WebClient(self.token)
         else:
-            self.webapi = slacker.Slacker(self.token, timeout=timeout)
+            self.webapi = WebClient(self.token, timeout=timeout)
 
         if connect:
             self.rtm_connect()
 
     def rtm_connect(self):
-        reply = self.webapi.rtm.start(**(self.rtm_start_args or {})).body
+        reply = self.webapi.rtm_connect(**(self.rtm_start_args or {})).validate()
         time.sleep(1)
         self.parse_slack_login_data(reply)
 
@@ -61,10 +59,6 @@ class SlackClient(object):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
-        self.parse_user_data(login_data['users'])
-        self.parse_channel_data(login_data['channels'])
-        self.parse_channel_data(login_data['groups'])
-        self.parse_channel_data(login_data['ims'])
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
@@ -72,12 +66,6 @@ class SlackClient(object):
                                            http_proxy_port=proxy_port, http_no_proxy=no_proxy)
 
         self.websocket.sock.setblocking(0)
-
-    def parse_channel_data(self, channel_data):
-        self.channels.update({c['id']: c for c in channel_data})
-
-    def parse_user_data(self, user_data):
-        self.users.update({u['id']: u for u in user_data})
 
     def send_to_websocket(self, data):
         """Send (data) directly to the websocket."""
@@ -126,20 +114,21 @@ class SlackClient(object):
 
     def upload_file(self, channel, fname, fpath, comment):
         fname = fname or to_utf8(os.path.basename(fpath))
-        self.webapi.files.upload(fpath,
-                                 channels=channel,
-                                 filename=fname,
-                                 initial_comment=comment)
+        with open(fname, 'rb') as handle:
+            self.webapi.files_upload(handle,
+                                     channels=channel,
+                                     filename=fname,
+                                     initial_comment=comment)
 
     def upload_content(self, channel, fname, content, comment):
-        self.webapi.files.upload(None,
+        self.webapi.files_upload(None,
                                  channels=channel,
                                  content=content,
                                  filename=fname,
                                  initial_comment=comment)
 
     def send_message(self, channel, message, attachments=None, as_user=True, thread_ts=None):
-        self.webapi.chat.post_message(
+        self.webapi.chat_postMessage(
                 channel,
                 message,
                 username=self.login_data['self']['name'],
@@ -150,30 +139,41 @@ class SlackClient(object):
                 thread_ts=thread_ts)
 
     def get_channel(self, channel_id):
-        return Channel(self, self.channels[channel_id])
+        reply = self.webapi.channels_info(channel_id)
+        if reply['ok']:
+            return Channel(self, reply['channel'])
 
     def open_dm_channel(self, user_id):
-        return self.webapi.im.open(user_id).body["channel"]["id"]
+        return self.webapi.im_open(user_id)["channel"]["id"]
 
     def find_channel_by_name(self, channel_name):
-        for channel_id, channel in iteritems(self.channels):
-            try:
-                name = channel['name']
-            except KeyError:
-                name = self.users[channel['user']]['name']
-            if name == channel_name:
-                return channel_id
+        reply = self.webapi.channels_list()
+        if reply['ok']:
+            for ch in reply['channels']:
+                if ch['name'] == channel_name:
+                    return ch['id']
 
-    def get_user(self, user_id):
-        return self.users.get(user_id)
+        # Could be a IM channel
+        user = self.find_user_by_name(channel_name)
+        if user:
+            return user['id']
 
     def find_user_by_name(self, username):
-        for userid, user in iteritems(self.users):
-            if user['name'] == username:
-                return userid
+        reply = self.webapi.users_list()
+
+        if reply['ok']:
+            for user in reply['members']:
+                if user['name'] == username:
+                    return user['id']
+
+    def get_user(self, user_id):
+        reply = self.webapi.users_info(user=user_id)
+
+        if reply['ok']:
+            return reply['user']
 
     def react_to_message(self, emojiname, channel, timestamp):
-        self.webapi.reactions.add(
+        self.webapi.reactions_add(
             name=emojiname,
             channel=channel,
             timestamp=timestamp)

@@ -63,21 +63,6 @@ def test_parse_channel_data(slack_client):
         'test-group-joined') == 'G5TV5TW3W'
 
 
-def test_parse_user_data(slack_client):
-    assert slack_client.find_user_by_name('bob') is None
-    slack_client.parse_user_data([{
-        'id': 'U123456',
-        'name': 'bob'
-    }])
-    assert slack_client.find_user_by_name('bob') == 'U123456'
-    slack_client.parse_user_data([{
-        'id': 'U123456',
-        'name': 'bob2'
-    }])
-    assert slack_client.find_user_by_name('bob') is None
-    assert slack_client.find_user_by_name('bob2') == 'U123456'
-
-
 def test_init_with_timeout():
     client = SlackClient(None, connect=False)
     assert client.webapi.api.timeout == 10  # seconds default timeout

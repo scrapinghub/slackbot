@@ -2,7 +2,7 @@ import threading
 import json
 import re
 import time
-import slacker
+from slack_sdk import WebClient
 import websocket
 import six
 from six.moves import _thread, range
@@ -13,7 +13,7 @@ class Driver(object):
     the tests code can concentrate on higher level logic.
     """
     def __init__(self, driver_apitoken, driver_username, testbot_username, channel, private_channel):
-        self.slacker = slacker.Slacker(driver_apitoken)
+        self.webapi = WebClient(token=driver_apitoken)
         self.driver_username = driver_username
         self.driver_userid = None
         self.test_channel = channel
@@ -142,7 +142,7 @@ class Driver(object):
     def _send_message_to_bot(self, channel, msg):
         self.clear_events()
         self._start_ts = time.time()
-        self.slacker.chat.post_message(channel, msg, username=self.driver_username)
+        self.webapi.chat_postMessage(channel, msg, username=self.driver_username)
 
     def _wait_for_bot_message(self, channel, match, maxwait=60, tosender=True, thread=False):
         for _ in range(maxwait):
@@ -157,10 +157,10 @@ class Driver(object):
             match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         oldest = start or self._start_ts
         latest = end or time.time()
-        func = self.slacker.channels.history if channel.startswith('C') \
-               else self.slacker.im.history
+        func = self.webapi.groups_history(channel) if channel.startswith('C') \
+               else self.webapi.im_history
         response = func(channel, oldest=oldest, latest=latest)
-        for msg in response.body['messages']:
+        for msg in response['messages']:
             if msg['type'] == 'message' and re.match(match, msg['text'], re.DOTALL):
                 return True
         return False
@@ -179,15 +179,15 @@ class Driver(object):
             return False
 
     def _fetch_users(self):
-        response = self.slacker.users.list()
-        for user in response.body['members']:
+        response = self.webapi.users_list()
+        for user in response['members']:
             self.users[user['name']] = user['id']
 
         self.testbot_userid = self.users[self.testbot_username]
         self.driver_userid = self.users[self.driver_username]
 
     def _rtm_connect(self):
-        r = self.slacker.rtm.start().body
+        r = self.webapi.rtm_connect()
         self.driver_username = r['self']['name']
         self.driver_userid = r['self']['id']
 
@@ -217,18 +217,18 @@ class Driver(object):
 
     def _start_dm_channel(self):
         """Start a slack direct messages channel with the test bot"""
-        response = self.slacker.im.open(self.testbot_userid)
-        self.dm_chan = response.body['channel']['id']
+        response = self.webapi.im_open(self.testbot_userid)
+        self.dm_chan = response['channel']['id']
 
     def _is_testbot_online(self):
-        response = self.slacker.users.get_presence(self.testbot_userid)
-        return response.body['presence'] == self.slacker.presence.ACTIVE
+        response = self.webapi.users_getPresence(self.testbot_userid)
+        return response['presence'] == 'active'
 
     def _has_uploaded_file(self, name, start=None, end=None):
         ts_from = start or self._start_ts
         ts_to = end or time.time()
-        response = self.slacker.files.list(user=self.testbot_userid, ts_from=ts_from, ts_to=ts_to)
-        for f in response.body['files']:
+        response = self.webapi.files_list(user=self.testbot_userid, ts_from=ts_from, ts_to=ts_to)
+        for f in response['files']:
             if f['name'] == name:
                 return True
         return False
@@ -254,12 +254,10 @@ class Driver(object):
             return False
 
     def _join_test_channel(self):
-        response = self.slacker.channels.join(self.test_channel)
-        self.cm_chan = response.body['channel']['id']
+        response = self.webapi.channels_join(self.test_channel)
+        self.cm_chan = response['channel']['id']
         self._invite_testbot_to_channel()
-
-        # Slacker/Slack API's still references to private_channels as 'groups'
-        private_channels = self.slacker.groups.list(self.test_private_channel).body['groups']
+        private_channels = self.webapi.groups_list()['groups']
         for private_channel in private_channels:
             if self.test_private_channel == private_channel['name']:
                 self.gm_chan = private_channel['id']
@@ -270,12 +268,12 @@ class Driver(object):
                 self.test_private_channel))
 
     def _invite_testbot_to_channel(self):
-        if self.testbot_userid not in self.slacker.channels.info(self.cm_chan).body['channel']['members']:
-            self.slacker.channels.invite(self.cm_chan, self.testbot_userid)
+        if self.testbot_userid not in self.webapi.channels_info(self.cm_chan)['channel']['members']:
+            self.webapi.channels_invite(self.cm_chan, self.testbot_userid)
 
     def _invite_testbot_to_private_channel(self, private_channel):
         if self.testbot_userid not in private_channel['members']:
-            self.slacker.groups.invite(self.gm_chan, self.testbot_userid)
+            self.webapi.groups_invite(self.gm_chan, self.testbot_userid)
 
     def _is_bot_message(self, msg):
         if msg['type'] != 'message':
