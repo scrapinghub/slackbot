@@ -1,3 +1,9 @@
+Release Notes - Slackbot - Version 1.0.1
+--------------------------------------------
+This release contains the following fixes:
+
+  * Fixed rtm.start deprecation issue.
+
 Release Notes - Slackbot - Version 1.0.0
 --------------------------------------------
 This release contains the following new features:
