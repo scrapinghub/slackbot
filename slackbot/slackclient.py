@@ -18,6 +18,23 @@ from slackbot.utils import to_utf8, get_http_proxy
 
 logger = logging.getLogger(__name__)
 
+def webapi_generic_list(webapi, resource_key, response_key):
+    """Generic <foo>.list request, where <foo> could be users, chanels,
+    etc."""
+    ret = []
+    next_cursor = None
+    while True:
+        args = {}
+        if next_cursor:
+            args['cursor'] = next_cursor
+        response = getattr(webapi, resource_key).list(**args)
+        ret.extend(response.body.get(response_key))
+
+        next_cursor = response.body.get('response_metadata', {}).get('next_cursor')
+        if not next_cursor:
+            break
+        logging.info('Getting next page for %s (%s collected)', resource_key, len(ret))
+    return ret
 
 class SlackClient(object):
     def __init__(self, token, timeout=None, bot_icon=None, bot_emoji=None, connect=True,
@@ -57,14 +74,18 @@ class SlackClient(object):
                 logger.exception('failed to reconnect: %s', e)
                 time.sleep(5)
 
+    def list_users(self):
+        return webapi_generic_list(self.webapi, 'users', 'members')
+
+    def list_channels(self):
+        return webapi_generic_list(self.webapi, 'conversations', 'channels')
+
     def parse_slack_login_data(self, login_data):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
-        self.parse_user_data(login_data['users'])
-        self.parse_channel_data(login_data['channels'])
-        self.parse_channel_data(login_data['groups'])
-        self.parse_channel_data(login_data['ims'])
+        self.parse_user_data(self.list_users())
+        self.parse_channel_data(self.list_channels())
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
@@ -153,7 +174,7 @@ class SlackClient(object):
         return Channel(self, self.channels[channel_id])
 
     def open_dm_channel(self, user_id):
-        return self.webapi.im.open(user_id).body["channel"]["id"]
+        return self.webapi.conversations.open(users=user_id).body["channel"]["id"]
 
     def find_channel_by_name(self, channel_name):
         for channel_id, channel in iteritems(self.channels):

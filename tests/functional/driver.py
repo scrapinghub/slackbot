@@ -157,9 +157,7 @@ class Driver(object):
             match = six.text_type(r'\<@{}\>: {}').format(self.driver_userid, match)
         oldest = start or self._start_ts
         latest = end or time.time()
-        func = self.slacker.channels.history if channel.startswith('C') \
-               else self.slacker.im.history
-        response = func(channel, oldest=oldest, latest=latest)
+        response = self.slacker.conversations.history(channel=channel, oldest=oldest, latest=latest)
         for msg in response.body['messages']:
             if msg['type'] == 'message' and re.match(match, msg['text'], re.DOTALL):
                 return True
@@ -217,7 +215,7 @@ class Driver(object):
 
     def _start_dm_channel(self):
         """Start a slack direct messages channel with the test bot"""
-        response = self.slacker.im.open(self.testbot_userid)
+        response = self.slacker.conversations.open(users=self.testbot_userid)
         self.dm_chan = response.body['channel']['id']
 
     def _is_testbot_online(self):

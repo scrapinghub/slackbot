@@ -9,9 +9,9 @@ init_proxychains() {
     cat >$ssconfig <<EOF
 {
     "server":"127.0.0.1",
-    "server_port":8800,
+    "server_port":8899,
     "local_address": "127.0.0.1",
-    "local_port":1800,
+    "local_port":1899,
     "password":"password",
     "timeout":600,
     "method":"aes-256-cfb"
@@ -26,7 +26,7 @@ remote_dns_subnet 224
 tcp_read_time_out 15000
 tcp_connect_time_out 8000
 [ProxyList]
-socks5 	127.0.0.1 1800
+socks5 	127.0.0.1 1899
 EOF
 }
 
