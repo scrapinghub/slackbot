@@ -52,9 +52,9 @@ class SlackClient(object):
         self.rtm_start_args = rtm_start_args
 
         if timeout is None:
-            self.webapi = slacker.Slacker(self.token)
+            self.webapi = slacker.Slacker(self.token, rate_limit_retries=30)
         else:
-            self.webapi = slacker.Slacker(self.token, timeout=timeout)
+            self.webapi = slacker.Slacker(self.token, rate_limit_retries=30, timeout=timeout)
 
         if connect:
             self.rtm_connect()
