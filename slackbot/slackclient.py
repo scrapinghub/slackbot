@@ -18,7 +18,7 @@ from slackbot.utils import to_utf8, get_http_proxy
 
 logger = logging.getLogger(__name__)
 
-def webapi_generic_list(webapi, resource_key, response_key):
+def webapi_generic_list(webapi, resource_key, response_key, **kw):
     """Generic <foo>.list request, where <foo> could be users, chanels,
     etc."""
     ret = []
@@ -27,7 +27,7 @@ def webapi_generic_list(webapi, resource_key, response_key):
         args = {}
         if next_cursor:
             args['cursor'] = next_cursor
-        response = getattr(webapi, resource_key).list(**args)
+        response = getattr(webapi, resource_key).list(**args, **kw)
         ret.extend(response.body.get(response_key))
 
         next_cursor = response.body.get('response_metadata', {}).get('next_cursor')
@@ -78,14 +78,20 @@ class SlackClient(object):
         return webapi_generic_list(self.webapi, 'users', 'members')
 
     def list_channels(self):
-        return webapi_generic_list(self.webapi, 'conversations', 'channels')
+        return webapi_generic_list(self.webapi, 'conversations', 'channels', types='public_channel,private_channel,mpim,im')
 
     def parse_slack_login_data(self, login_data):
         self.login_data = login_data
         self.domain = self.login_data['team']['domain']
         self.username = self.login_data['self']['name']
+
+        logger.info('Loading all users')
         self.parse_user_data(self.list_users())
+        logger.info('Loaded all users')
+
+        logger.info('Loading all channels')
         self.parse_channel_data(self.list_channels())
+        logger.info('Loaded all channels')
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
