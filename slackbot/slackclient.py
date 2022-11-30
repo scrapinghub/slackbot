@@ -6,6 +6,7 @@ import json
 import logging
 import time
 from ssl import SSLError
+from copy import deepcopy
 
 import slacker
 from six import iteritems
@@ -24,10 +25,10 @@ def webapi_generic_list(webapi, resource_key, response_key, **kw):
     ret = []
     next_cursor = None
     while True:
-        args = {}
+        args = deepcopy(kw)
         if next_cursor:
             args['cursor'] = next_cursor
-        response = getattr(webapi, resource_key).list(**args, **kw)
+        response = getattr(webapi, resource_key).list(**args)
         ret.extend(response.body.get(response_key))
 
         next_cursor = response.body.get('response_metadata', {}).get('next_cursor')
