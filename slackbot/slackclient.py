@@ -26,8 +26,9 @@ def webapi_generic_list(webapi, resource_key, response_key, **kw):
     next_cursor = None
     while True:
         args = deepcopy(kw)
-        # Slack API says max limit is 1000
-        args['limit'] = 800
+        if resource_key == 'conversations':
+            # Slack API says max limit is 1000
+            args['limit'] = 800
         if next_cursor:
             args['cursor'] = next_cursor
         response = getattr(webapi, resource_key).list(**args)
