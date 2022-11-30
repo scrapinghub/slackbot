@@ -58,16 +58,17 @@ class SlackClient(object):
             self.webapi = slacker.Slacker(self.token, rate_limit_retries=30, timeout=timeout)
 
         if connect:
-            self.rtm_connect()
+            self.ensure_connection()
 
     def rtm_connect(self):
         reply = self.webapi.rtm.start(**(self.rtm_start_args or {})).body
         time.sleep(1)
         self.parse_slack_login_data(reply)
 
-    def reconnect(self):
+    def ensure_connection(self):
         while True:
             try:
+                self.list_users_and_channels()
                 self.rtm_connect()
                 logger.warning('reconnected to slack rtm websocket')
                 return
@@ -81,11 +82,7 @@ class SlackClient(object):
     def list_channels(self):
         return webapi_generic_list(self.webapi, 'conversations', 'channels', types='public_channel,private_channel,mpim,im')
 
-    def parse_slack_login_data(self, login_data):
-        self.login_data = login_data
-        self.domain = self.login_data['team']['domain']
-        self.username = self.login_data['self']['name']
-
+    def list_users_and_channels(self):
         logger.info('Loading all users')
         self.parse_user_data(self.list_users())
         logger.info('Loaded all users')
@@ -93,6 +90,12 @@ class SlackClient(object):
         logger.info('Loading all channels')
         self.parse_channel_data(self.list_channels())
         logger.info('Loaded all channels')
+
+    def parse_slack_login_data(self, login_data):
+        self.login_data = login_data
+        self.domain = self.login_data['team']['domain']
+        self.username = self.login_data['self']['name']
+
 
         proxy, proxy_port, no_proxy = get_http_proxy(os.environ)
 
@@ -126,7 +129,7 @@ class SlackClient(object):
                     logger.warning('lost websocket connection, try to reconnect now')
                 else:
                     logger.warning('websocket exception: %s', e)
-                self.reconnect()
+                self.ensure_connection()
             except Exception as e:
                 if isinstance(e, SSLError) and e.errno == 2:
                     pass
