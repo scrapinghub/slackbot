@@ -65,10 +65,6 @@ class MessageDispatcher(object):
                         self._client.rtm_send_message(self._errors_to,
                                                       '{}\n{}'.format(reply,
                                                                       tb))
-                    else:
-                        self._client.rtm_send_message(msg['channel'],
-                                                      '{}\n{}'.format(reply,
-                                                                      tb))
         return responded
 
     def _on_new_message(self, msg):
