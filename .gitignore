@@ -15,3 +15,4 @@ slackbot_test_settings.py
 /*.egg-info
 .cache
 /.vscode/
+.idea
